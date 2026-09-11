@@ -25,6 +25,7 @@
  *     wedged daemon reader (not just a dead socket) is detected too.
  */
 
+import { createBackoffDriver, type BackoffDriver } from './backoff';
 import {
     WS_PANE_MODES_MESSAGE,
     WS_PROTOCOL_VERSION,
@@ -259,7 +260,7 @@ export class KelpiConnection {
     private ready = false;
     private stopped = true;
     private fatal = false;
-    private attempt = 0;
+    private readonly backoffDriver: BackoffDriver;
     private url: string;
     private token: string;
 
@@ -278,6 +279,7 @@ export class KelpiConnection {
         this.options = options;
         this.socketFactory = options.socketFactory ?? defaultSocketFactory;
         this.backoff = { ...DEFAULT_BACKOFF, ...(options.backoff ?? {}) };
+        this.backoffDriver = createBackoffDriver({ ...this.backoff, random: options.random ?? Math.random });
         this.token = options.token ?? '';
         this.url = resolveWsUrl(options.url, this.token);
     }
@@ -354,7 +356,7 @@ export class KelpiConnection {
      */
     resync(reason = 'client requested resync'): void {
         if (this.stopped) return;
-        this.attempt = 0;
+        this.backoffDriver.reset();
         const socket = this.socket;
         this.ready = false;
         this.stopHeartbeat();
@@ -406,7 +408,7 @@ export class KelpiConnection {
     // ── socket lifecycle ────────────────────────────────────────────────────────────
 
     private open(): void {
-        this.setStatus(this.attempt === 0 ? 'connecting' : 'reconnecting');
+        this.setStatus(this.backoffDriver.attempt === 0 ? 'connecting' : 'reconnecting');
         let socket: SocketLike;
         try {
             socket = this.socketFactory(this.url);
@@ -573,7 +575,7 @@ export class KelpiConnection {
     private handleWelcome(message: WsWelcomeMessage): void {
         this.welcomeMessage = message;
         this.ready = true;
-        this.attempt = 0;
+        this.backoffDriver.reset();
         this.pingSentAt = null;
         this.startHeartbeat();
         // Status first, so subscribers (the PTY client's re-attach) get their frames onto the
@@ -669,15 +671,12 @@ export class KelpiConnection {
         }, delay);
     }
 
-    /** Exponential with symmetric jitter; the attempt counter resets on `welcome`. */
+    /**
+     * Exponential with symmetric jitter; the attempt counter resets on `welcome`.
+     * Delegates to `./backoff.ts`'s Effect `Schedule` — see that module for why.
+     */
     nextDelay(): number {
-        const { initialMs, maxMs, factor, jitter } = this.backoff;
-        const base = Math.min(maxMs, initialMs * Math.pow(factor, this.attempt));
-        this.attempt += 1;
-        if (jitter <= 0) return Math.round(base);
-        const random = this.options.random ?? Math.random;
-        const spread = base * jitter;
-        return Math.max(0, Math.round(base - spread + random() * spread * 2));
+        return this.backoffDriver.next();
     }
 
     private clearReconnectTimer(): void {
