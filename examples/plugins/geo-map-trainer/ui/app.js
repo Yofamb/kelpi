@@ -3,7 +3,7 @@ import { COUNTRIES, flagSrc } from './countries.js';
 const api = window.kelpi;
 await api.ready;
 const $ = (id) => document.getElementById(id);
-const id = 'example.geo-map-trainee';
+const id = 'example.geo-map-trainer';
 
 let stats = { streak: 0, bestStreak: 0, total: 0, correct: 0, misses: {} };
 let current = null; // { country, type, options, answered }
@@ -17,7 +17,7 @@ function shuffle(items) {
     return copy;
 }
 
-/** Weighted toward countries you've missed before — the "trainer" in Geo Map Trainee. */
+/** Weighted toward countries you've missed before — the "trainer" in Geo Map Trainer. */
 function pickCountry() {
     const weights = COUNTRIES.map((country) => 1 + (stats.misses[country.code] ?? 0) * 2);
     const total = weights.reduce((sum, w) => sum + w, 0);

@@ -1,6 +1,6 @@
 /** @param {import('../../../packages/plugin-sdk/index.js').BackendAPI} api */
 export async function activate(api) {
-    const id = 'example.geo-map-trainee';
+    const id = 'example.geo-map-trainer';
     let stats = (await api.storage.get('stats')) ?? { streak: 0, bestStreak: 0, total: 0, correct: 0, misses: {} };
 
     const publish = () => {
@@ -11,7 +11,7 @@ export async function activate(api) {
                 [`${id}.status`]: {
                     badge: String(stats.streak),
                     tone: stats.streak > 0 ? 'success' : 'default',
-                    tooltip: `Geo Map Trainee — streak ${stats.streak} (best ${stats.bestStreak}), ${stats.correct}/${stats.total} correct (${accuracy}%)`
+                    tooltip: `Geo Map Trainer — streak ${stats.streak} (best ${stats.bestStreak}), ${stats.correct}/${stats.total} correct (${accuracy}%)`
                 }
             }
         });

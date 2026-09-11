@@ -1,0 +1,36 @@
+{
+  "id": "example.geo-map-trainer",
+  "name": "Geo Map Trainer",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "trust": "full",
+  "backend": "backend.mjs",
+  "activation": "startup",
+  "contributes": {
+    "views": [
+      { "id": "example.geo-map-trainer.trainer", "title": "Geo Map Trainer", "entry": "ui/index.html", "stateVersion": 1, "placements": ["pane", "sidebar.secondary", "panel.bottom"] }
+    ],
+    "commands": [
+      { "id": "example.geo-map-trainer.open", "title": "Open Geo Map Trainer", "shortcut": "super+shift+g", "menu": "both" },
+      { "id": "example.geo-map-trainer.stats", "title": "Read Geo Map Trainer stats" },
+      { "id": "example.geo-map-trainer.record", "title": "Record a Geo Map Trainer answer" },
+      { "id": "example.geo-map-trainer.reset", "title": "Reset Geo Map Trainer stats" }
+    ],
+    "menus": [
+      { "id": "example.geo-map-trainer.menu-reset", "command": "example.geo-map-trainer.reset", "placement": "palette", "group": "Geo Map Trainer", "order": 10 }
+    ],
+    "items": [
+      { "id": "example.geo-map-trainer.status", "placement": "statusbar", "text": "Geo", "tooltip": "Geo Map Trainer", "badge": "0", "tone": "default", "command": "example.geo-map-trainer.open", "order": 20 }
+    ],
+    "settings": {
+      "mode": {
+        "title": "Question mix",
+        "type": "string",
+        "default": "mixed",
+        "enum": ["mixed", "flags", "tells"],
+        "description": "mixed alternates flag-ID and tell-ID questions; flags/tells drill just one.",
+        "order": 10
+      }
+    }
+  }
+}

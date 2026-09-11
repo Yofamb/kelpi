@@ -1,4 +1,4 @@
-# Geo Map Trainee
+# Geo Map Trainer
 
 A build-free GeoGuessr-style flashcard trainer: guess the country from its flag, or from a
 one-line "tell" (driving side, road markings, pole/bollard style, plates, terrain) — four
@@ -8,15 +8,15 @@ countries are weighted back into rotation more often, so practice actually targe
 instead of being uniformly random.
 
 ```sh
-kelpi plugin install ./examples/plugins/geo-map-trainee --trust
-kelpi plugin run example.geo-map-trainee.open
-kelpi plugin run example.geo-map-trainee.stats
+kelpi plugin install ./examples/plugins/geo-map-trainer --trust
+kelpi plugin run example.geo-map-trainer.open
+kelpi plugin run example.geo-map-trainer.stats
 ```
 
-Choose `Geo Map Trainee` in Settings → Plugins → Workbench views to give it a sidebar or bottom
+Choose `Geo Map Trainer` in Settings → Plugins → Workbench views to give it a sidebar or bottom
 panel slot, or just open it as a pane. The status bar shows your current streak; Settings →
 Plugins lets you drill just flags, just tells, or both. Streak/accuracy/miss stats persist
-in plugin storage across restarts; the ↻ button (or the command palette's "Reset Geo Map Trainee
+in plugin storage across restarts; the ↻ button (or the command palette's "Reset Geo Map Trainer
 stats") clears them.
 
 `ui/countries.js` holds the dataset — every "tell" is written from scratch for this example,
