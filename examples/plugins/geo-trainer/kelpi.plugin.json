@@ -1,0 +1,36 @@
+{
+  "id": "example.geo-trainer",
+  "name": "Geo Trainer",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "trust": "full",
+  "backend": "backend.mjs",
+  "activation": "startup",
+  "contributes": {
+    "views": [
+      { "id": "example.geo-trainer.trainer", "title": "Geo Trainer", "entry": "ui/index.html", "stateVersion": 1, "placements": ["pane", "sidebar.secondary", "panel.bottom"] }
+    ],
+    "commands": [
+      { "id": "example.geo-trainer.open", "title": "Open Geo Trainer", "shortcut": "super+shift+g", "menu": "both" },
+      { "id": "example.geo-trainer.stats", "title": "Read Geo Trainer stats" },
+      { "id": "example.geo-trainer.record", "title": "Record a Geo Trainer answer" },
+      { "id": "example.geo-trainer.reset", "title": "Reset Geo Trainer stats" }
+    ],
+    "menus": [
+      { "id": "example.geo-trainer.menu-reset", "command": "example.geo-trainer.reset", "placement": "palette", "group": "Geo Trainer", "order": 10 }
+    ],
+    "items": [
+      { "id": "example.geo-trainer.status", "placement": "statusbar", "text": "Geo", "tooltip": "Geo Trainer", "badge": "0", "tone": "default", "command": "example.geo-trainer.open", "order": 20 }
+    ],
+    "settings": {
+      "mode": {
+        "title": "Question mix",
+        "type": "string",
+        "default": "mixed",
+        "enum": ["mixed", "flags", "tells"],
+        "description": "mixed alternates flag-ID and tell-ID questions; flags/tells drill just one.",
+        "order": 10
+      }
+    }
+  }
+}
