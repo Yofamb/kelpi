@@ -1,4 +1,4 @@
-import { COUNTRIES, flagEmoji } from './countries.js';
+import { COUNTRIES, flagSrc } from './countries.js';
 
 const api = window.kelpi;
 await api.ready;
@@ -46,10 +46,25 @@ async function nextQuestion() {
     render();
 }
 
+function flagImg(country, extraClass = '') {
+    const img = document.createElement('img');
+    img.src = flagSrc(country.code);
+    img.alt = `Flag of ${country.name}`;
+    img.width = 60;
+    img.height = 40;
+    if (extraClass) img.className = extraClass;
+    return img;
+}
+
 function render() {
     const stimulus = $('stimulus');
-    stimulus.textContent = current.type === 'flag' ? flagEmoji(current.country.code) : current.country.tell;
+    stimulus.replaceChildren();
     stimulus.className = current.type === 'flag' ? 'stimulus flag' : 'stimulus tell';
+    if (current.type === 'flag') {
+        stimulus.append(flagImg(current.country, 'stimulus-flag'));
+    } else {
+        stimulus.textContent = current.country.tell;
+    }
 
     const grid = $('options');
     grid.replaceChildren();
@@ -78,11 +93,16 @@ async function choose(option) {
         button.disabled = true;
     }
 
-    const flag = flagEmoji(current.country.code);
-    $('feedback').textContent = correct
-        ? `Correct — ${flag} ${current.country.name}. ${current.country.tell}`
-        : `Not quite — that was ${flag} ${current.country.name}. ${current.country.tell}`;
-    $('feedback').className = correct ? 'feedback correct' : 'feedback wrong';
+    const feedback = $('feedback');
+    feedback.replaceChildren();
+    feedback.append(
+        flagImg(current.country, 'feedback-flag'),
+        document.createTextNode(
+            (correct ? 'Correct — ' : 'Not quite — that was ') +
+                `${current.country.name}. ${current.country.tell}`
+        )
+    );
+    feedback.className = correct ? 'feedback correct' : 'feedback wrong';
     $('next').hidden = false;
 
     stats = await api.commands.execute(`${id}.record`, { code: current.country.code, correct });

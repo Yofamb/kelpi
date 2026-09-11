@@ -7,9 +7,10 @@ header span{flex:1;color:var(--kelpi-fg-secondary,#aaa);font-size:11px;text-alig
 header button{font:inherit;color:inherit;background:transparent;border:1px solid var(--kelpi-border,#555);border-radius:5px;padding:3px 7px;cursor:pointer}
 header button:hover{background:var(--kelpi-border,#333)}
 main{padding:16px;display:flex;flex-direction:column;gap:12px;align-items:center;text-align:center}
-.stimulus{min-height:64px;display:flex;align-items:center;justify-content:center}
-.stimulus.flag{font-size:56px;line-height:1}
+.stimulus{min-height:100px;display:flex;align-items:center;justify-content:center}
 .stimulus.tell{font-size:14px;line-height:1.5;color:var(--kelpi-fg,#ddd);max-width:38em}
+.stimulus-flag{width:180px;height:120px;object-fit:cover;border-radius:6px;box-shadow:0 1px 4px rgba(0,0,0,.35);border:1px solid var(--kelpi-border,#333)}
+.feedback-flag{width:28px;height:18px;object-fit:cover;border-radius:2px;vertical-align:middle;margin-right:6px;border:1px solid var(--kelpi-border,#333)}
 .options{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:28em}
 .options button{font:inherit;color:inherit;background:transparent;border:1px solid var(--kelpi-border,#555);border-radius:6px;padding:10px 8px;cursor:pointer}
 .options button:hover:not(:disabled){background:var(--kelpi-border,#333)}

@@ -66,3 +66,12 @@ export const COUNTRIES = [
 
 export const flagEmoji = (code) =>
     String.fromCodePoint(...[...code.toUpperCase()].map((letter) => 127397 + letter.charCodeAt(0)));
+
+/**
+ * Full-colour flag artwork, bundled same-origin under `ui/flags/` (from the MIT-licensed
+ * https://github.com/lipis/flag-icons — see `ui/flags/LICENSE-flag-icons.txt`) rather than
+ * fetched from a CDN at runtime: the daemon serves every plugin view under a CSP of
+ * `img-src 'self' data:; connect-src 'none'` (`packages/daemon/src/plugins/http.ts`), so a
+ * cross-origin `<img src>` or `fetch` to an external host is refused outright, by design.
+ */
+export const flagSrc = (code) => `flags/${code.toLowerCase()}.svg`;
