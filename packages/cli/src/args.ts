@@ -10,7 +10,8 @@
  *     `--name --json` sets the name to the literal `--json`;
  *   - a flag in FINAL position has no value: it returns null and is LEFT in argv, where the
  *     leftover check rejects it as an unknown option;
- *   - `--` tails exist only for `web click|type|select`;
+ *   - `--` tails exist only for `web click|type|select` and `group create|rename|delete`, where
+ *     every word after it is a name, so `kelpi group delete -- --help` can name a group `--help`;
  *   - `rejectLeftoverArgs` is what makes `kelpi pane capture <uuid>` fail loudly instead of
  *     silently capturing the caller (issue #237).
  *

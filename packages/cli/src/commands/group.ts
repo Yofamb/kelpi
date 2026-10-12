@@ -8,13 +8,29 @@
  * request/response too, with the same full-reply `--json`.
  */
 
-import { absoluteUserPath, hasHelpFlag, isHelpToken, parseFlag, popSwitch, rejectLeftoverArgs } from '../args.js';
+import {
+    absoluteUserPath,
+    extractPositionalTail,
+    hasHelpFlag,
+    isHelpToken,
+    parseFlag,
+    popSwitch,
+    rejectLeftoverArgs
+} from '../args.js';
 import { errLine, exit, printLine, writeErr, writeOut } from '../io.js';
 import { asString, asStringArray, stableStringify, type JsonObject } from '../json.js';
 import { decodeReply } from '../reply.js';
 import { printGroupTable, replyArray } from '../table.js';
 import { sendJSON } from '../transport.js';
-import { groupReorderUsage, groupSetRepoUsage, groupSortUsage, groupUsage } from '../usage.js';
+import {
+    groupCreateUsage,
+    groupDeleteUsage,
+    groupRenameUsage,
+    groupReorderUsage,
+    groupSetRepoUsage,
+    groupSortUsage,
+    groupUsage
+} from '../usage.js';
 
 export async function handleGroup(args: string[]): Promise<void> {
     const action = args.shift();
@@ -129,21 +145,35 @@ async function handleGroupList(args: string[]): Promise<void> {
     printGroupTable(groups, noHeader);
 }
 
+/**
+ * `create` / `rename` / `delete` read their flags first, from the words before any `--`. The
+ * names are the words left over, then every word after the `--`, which is a name even when it
+ * looks like a flag: `kelpi group delete -- --help` deletes a group called `--help`.
+ */
 async function handleGroupCreate(args: string[]): Promise<void> {
-    const name = args.shift();
+    const tail = extractPositionalTail(args);
+    if (hasHelpFlag(args)) {
+        writeOut(groupCreateUsage);
+        exit(0);
+    }
+    const color = parseFlag('--color', args);
+    const [name] = [...args, ...tail];
     if (name === undefined) {
         errLine('Usage: kelpi group create <name> [--color blue]');
         exit(1);
     }
-    const color = parseFlag('--color', args);
     const payload: JsonObject = { command: 'group-create', name };
     if (color !== null) payload['color'] = color;
     await sendJSON(payload);
 }
 
 async function handleGroupRename(args: string[]): Promise<void> {
-    const nameOrID = args.shift();
-    const newName = args.shift();
+    const tail = extractPositionalTail(args);
+    if (hasHelpFlag(args)) {
+        writeOut(groupRenameUsage);
+        exit(0);
+    }
+    const [nameOrID, newName] = [...args, ...tail];
     if (nameOrID === undefined || newName === undefined) {
         errLine('Usage: kelpi group rename <name-or-id> <new-name>');
         exit(1);
@@ -152,12 +182,17 @@ async function handleGroupRename(args: string[]): Promise<void> {
 }
 
 async function handleGroupDelete(args: string[]): Promise<void> {
-    const nameOrID = args.shift();
+    const tail = extractPositionalTail(args);
+    if (hasHelpFlag(args)) {
+        writeOut(groupDeleteUsage);
+        exit(0);
+    }
+    const cascade = popSwitch('--cascade', args);
+    const [nameOrID] = [...args, ...tail];
     if (nameOrID === undefined) {
         errLine('Usage: kelpi group delete <name-or-id> [--cascade]');
         exit(1);
     }
-    const cascade = popSwitch('--cascade', args);
     // `cascade` is always present as a native JSON boolean.
     await sendJSON({ command: 'group-delete', name: nameOrID, cascade });
 }
