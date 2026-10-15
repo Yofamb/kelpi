@@ -2,6 +2,7 @@ import type { AgentsAPI, ApplicationSettingsAPI, GitAPI, GroupsAPI, LayoutAPI, P
 import type { BuiltinProviderMethods, BuiltinServiceArgs, BuiltinServiceID, BuiltinServiceMethod, BuiltinServiceResult, ProcessExecResult } from './services.js';
 import type { ContributionsAPI } from './contributions.js';
 import type { WindowUIServices } from './ui.js';
+import type { BackendUIServices } from './ui.js';
 import type { WindowChromeAPI } from './chrome.js';
 import type { WindowInteractionAPI } from './interaction.js';
 import type { WindowSettingsAPI } from './settings.js';
@@ -93,6 +94,7 @@ export type CliInvocation = { argv: string[]; cwd: string; isTTY: boolean; json:
  */
 export type CliResult = { text?: string; json?: Json; exitCode?: number; stderr?: string };
 export interface BackendAPI extends KelpiAPI {
+    ui: KelpiAPI['ui'] & BackendUIServices;
     /** A command mapped from `contributes.cli` receives a `CliInvocation` as its args and should return a `CliResult`. */
     commands: KelpiAPI['commands'] & { register(id: string, handler: (args: Data, context: Context) => Json | void | Promise<Json | void>): Dispose };
     hooks: { register(id: string, handler: (invocation: HookInvocation) => HookDecision | void | Promise<HookDecision | void>): Dispose };
