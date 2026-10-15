@@ -1,9 +1,10 @@
 import { useMemo, useSyncExternalStore } from 'react';
 import {
-    decodePluginItemPatch, isPluginContextKey, isPluginID, PLUGIN_MAX_CONTRIBUTION_BYTES, pluginObject, pluginRecord,
+    decodePluginItemPatch, isPluginContextKey, isPluginID, PLUGIN_COMMAND_ICONS, PLUGIN_MAX_CONTRIBUTION_BYTES, pluginObject, pluginRecord,
     type PluginContextValue, type PluginContributionInfo, type PluginContributionState, type PluginInfo,
-    type PluginItemDefinition, type PluginItemTone, type PluginMenuDefinition, type PluginWhen
+    type PluginItemDefinition, type PluginItemTone, type PluginMenuDefinition, type PluginWhen, type PluginCommandIcon
 } from '@kelpi/protocol';
+import type { IconName } from '../grid/icons';
 import type { PaneChromeItemDescriptor } from '../pane-chrome';
 import type { KelpiRuntime } from '../state';
 import type { KelpiState } from '../state/store';
@@ -271,11 +272,14 @@ export function paneChromeItemDescriptors(items: readonly ResolvedContributionIt
         tone: item.tone, enabled: item.enabled
     }));
 }
+// Every glyph a plugin may name must be one the header can draw.
+PLUGIN_COMMAND_ICONS satisfies readonly IconName[];
 export interface ResolvedContributionMenu {
     readonly id: string;
     readonly pluginID: string;
     readonly command: string;
     readonly title: string;
+    readonly icon?: PluginCommandIcon;
     readonly placement: PluginMenuDefinition['placement'];
     readonly group?: string;
     readonly order: number;
@@ -290,6 +294,7 @@ export function resolveContributionMenus(plugins: readonly PluginInfo[], states:
             if (!rules.length && (placement === 'palette' || command.menu === placement || command.menu === 'both' && (placement === 'pane' || placement === 'workspace'))) rules = [{ id: `${command.id}:${placement}`, command: command.id, placement }];
             return rules.filter(rule => matchesWhen(rule.when, context)).map(rule => ({
                 id: rule.id, pluginID: plugin.manifest.id, command: command.id, title: command.title, placement,
+                ...(command.icon === undefined ? {} : { icon: command.icon }),
                 ...(rule.group === undefined ? {} : { group: rule.group }), order: rule.order ?? 0,
                 enabled: matchesWhen(command.enablement, context) && matchesWhen(rule.enablement, context)
             }));

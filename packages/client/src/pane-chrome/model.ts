@@ -303,6 +303,8 @@ export function headerOverflowCount(input: OverflowFitInput): number {
 export interface PaneChromeCommandInput {
     readonly id: string;
     readonly title: string;
+    /** A plugin command's own glyph; the generic plugin glyph when it names none. */
+    readonly icon?: IconName | undefined;
     readonly enabled?: boolean | undefined;
     run(paneID: string): void;
 }
@@ -530,7 +532,7 @@ export function paneChromeModel(input: PaneChromeInput): PaneChromeModel {
                 key: command.id,
                 kind: 'item',
                 label: command.title,
-                icon: 'plugin',
+                icon: command.icon ?? 'plugin',
                 testID: `pane-command-${command.id}-${pane.id}`,
                 enabled: command.enabled !== false
             })

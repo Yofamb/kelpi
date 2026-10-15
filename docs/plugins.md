@@ -223,7 +223,9 @@ kelpi plugin install ./my-plugin.kelpi-plugin --trust
 
 Validation checks API compatibility, manifest declarations, entry files, portable paths,
 and package limits. The report includes the manifest version, dependencies, content revision,
-and each file's size and SHA-256 digest. Installed dependency availability is checked by the
+and each file's size and SHA-256 digest. Its `warnings` list, also printed to standard error,
+names declarations that still validate but are probably mistakes, such as a command `icon`
+this build does not draw. Installed dependency availability is checked by the
 daemon, rather than by offline validation. Validation never runs the backend or proves that
 its code works.
 
@@ -673,6 +675,8 @@ instead when a built-in or an earlier plugin takes it, and what a later plugin r
 the command does not apply. Views read the same list as the chrome
 snapshot's [`keymap`](plugin-chrome.md#the-keyboard-map). Set a command's `menu` to
 `pane.header` to contribute a pane-header action, including the header's overflow behavior.
+Its optional `icon` picks the button's glyph from Kelpi's built-in set
+([UI contributions](plugin-ui.md)).
 Settings → Plugins lets users change, disable, and restore each plugin shortcut. Overrides
 belong to the client and stable daemon identity, survive reload, and update mounted views.
 Unmodified typing and Shift-only shortcuts are rejected; bundled shortcuts retain priority.
