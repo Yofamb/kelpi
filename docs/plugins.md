@@ -427,6 +427,11 @@ events, runs it from ⌃⌥R or a `pane.header` item after a backend dialog, typ
 behind `ifRevision`, and adds `kelpi run-suggested`, which cannot prompt, so it prints the
 command or runs it with `--yes`.
 
+[Auto-approve](../examples/plugins/auto-approve) adds `kelpi auto-approve on [minutes] | off | status`
+the same way, beside a `kelpi.agent.permissions` provider, a status bar item and a palette toggle:
+while on, it allows Claude's Bash commands that pass its never-auto-approve list and abstains on
+everything else, and `on` and `status` warn on standard error until the provider is selected.
+
 ## Updates and recovery
 
 Inspect retained revisions and switch back using their full content identity:
