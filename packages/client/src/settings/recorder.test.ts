@@ -51,6 +51,21 @@ describe('the key recorder (§13.2)', () => {
         expect(recordKeyEvent(press('IntlBackslash', { metaKey: true }), options)).toEqual({ kind: 'ignored' });
     });
 
+    it('records a German ⌘- as the chord the dispatcher will match, not the physical ⌘/ (#245)', () => {
+        // `-` is the Slash key on a German layout. Recorded against an empty map so no conflict hides it.
+        expect(recordKeyEvent(press('Slash', { metaKey: true, key: '-' }), { bindings: new Map() })).toMatchObject({
+            kind: 'captured',
+            config: 'super+-'
+        });
+    });
+
+    it('refuses a German ⇧, (which types the bare US `;`) as a combo with no modifier (#245)', () => {
+        expect(recordKeyEvent(press('Comma', { shiftKey: true, key: ';' }), { bindings: new Map() })).toEqual({
+            kind: 'rejected',
+            reason: NEEDS_MODIFIER_MESSAGE
+        });
+    });
+
     it('refuses a combo another action already owns, naming it (§8.5)', () => {
         const outcome = recordKeyEvent(press('KeyD', { metaKey: true }), {
             bindings: DEFAULT_KEYBINDINGS,
