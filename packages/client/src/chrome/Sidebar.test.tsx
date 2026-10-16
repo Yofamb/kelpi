@@ -938,23 +938,28 @@ describe('drag auto-scroll (§5.5)', () => {
         vi.useRealTimers();
     });
 
-    function mount(contentHeight: number): {
+    function mount(
+        contentHeight: number,
+        entries: () => ChromeSidebarEntry[] = many
+    ): {
         list: HTMLElement;
         onMoveWorkspace: ReturnType<typeof vi.fn>;
         onNestWorkspaces: ReturnType<typeof vi.fn>;
+        rerenderWithFreshProps: () => void;
     } {
         vi.useFakeTimers();
         const onMoveWorkspace = vi.fn();
         const onNestWorkspaces = vi.fn();
-        render(
+        const element = (): ReactElement => (
             <Sidebar
                 {...noopProps()}
                 activeWorkspaceID={ids[0] as string}
-                entries={many()}
+                entries={entries()}
                 onMoveWorkspace={onMoveWorkspace}
                 onNestWorkspaces={onNestWorkspaces}
             />
         );
+        const { rerender } = render(element());
         const list = screen.getByTestId('sidebar').querySelector<HTMLElement>('[role="listbox"]');
         if (list === null) throw new Error('no list');
         const viewport = 100;
@@ -972,7 +977,11 @@ describe('drag auto-scroll (§5.5)', () => {
                 scrollTop = Math.min(Math.max(0, value), Math.max(0, contentHeight - viewport));
             }
         });
-        return { list, onMoveWorkspace, onNestWorkspaces };
+        // A parent render, as the 1 s agent-status tick does: every prop object is new.
+        const rerenderWithFreshProps = (): void => {
+            rerender(element());
+        };
+        return { list, onMoveWorkspace, onNestWorkspaces, rerenderWithFreshProps };
     }
 
     function tick(): void {
@@ -1025,6 +1034,159 @@ describe('drag auto-scroll (§5.5)', () => {
         fireEvent.mouseUp(window);
         expect(onMoveWorkspace).not.toHaveBeenCalled();
         expect(onNestWorkspaces).toHaveBeenCalledWith({ workspaceIDs: [ids[0]], parentID: ids[8], index: 0 });
+    });
+
+    it('keeps scrolling under a still pointer across a parent re-render (#415)', () => {
+        const { list, rerenderWithFreshProps } = mount(204);
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[0] as HTMLElement, { clientY: 10 });
+        fireEvent.mouseMove(window, { clientY: 72 });
+        for (let index = 0; index < 5; index += 1) tick();
+        expect(list.scrollTop).toBe(15);
+        rerenderWithFreshProps();
+        for (let index = 0; index < 5; index += 1) tick();
+        expect(list.scrollTop).toBe(30);
+        rerenderWithFreshProps();
+        rerenderWithFreshProps();
+        for (let index = 0; index < 5; index += 1) tick();
+        expect(list.scrollTop).toBe(45);
+        fireEvent.mouseUp(window);
+        // The release still stops it, re-render or not.
+        for (let index = 0; index < 5; index += 1) tick();
+        expect(list.scrollTop).toBe(45);
+    });
+
+    it('a press under the drag threshold never scrolls, parent re-render or not (#415)', () => {
+        const { list, rerenderWithFreshProps } = mount(204);
+        // Pressed IN the bottom band and moved 3px: under the 5px threshold, so no drag yet.
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[3] as HTMLElement, { clientY: 70 });
+        fireEvent.mouseMove(window, { clientY: 73 });
+        rerenderWithFreshProps();
+        for (let index = 0; index < 5; index += 1) tick();
+        expect(list.scrollTop).toBe(0);
+        expect(list.dataset['dragAutoscroll']).not.toBe('true');
+        fireEvent.mouseUp(window);
+    });
+
+    it('a press after a gesture whose mouseup was lost does not inherit its auto-scroll (#415)', () => {
+        const { list } = mount(204);
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[0] as HTMLElement, { clientY: 10 });
+        fireEvent.mouseMove(window, { clientY: 72 });
+        tick();
+        expect(list.dataset['dragAutoscroll']).toBe('true');
+        const scrolled = list.scrollTop;
+        // No mouseup: the next press replaces the drag while the pointer is still in the band.
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[4] as HTMLElement, { clientY: 80 });
+        for (let index = 0; index < 5; index += 1) tick();
+        expect(list.scrollTop).toBe(scrolled);
+        expect(list.dataset['dragAutoscroll']).toBe('false');
+        fireEvent.mouseUp(window);
+    });
+
+    it('an unmount mid-sweep leaves no auto-scroll interval running (#415)', () => {
+        const { list, rerenderWithFreshProps } = mount(204);
+        const idle = vi.getTimerCount();
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[0] as HTMLElement, { clientY: 10 });
+        fireEvent.mouseMove(window, { clientY: 72 });
+        rerenderWithFreshProps();
+        tick();
+        expect(list.dataset['dragAutoscroll']).toBe('true');
+        expect(vi.getTimerCount()).toBeGreaterThan(idle);
+        cleanup();
+        // Whatever else the unmount leaves (springs, retire timers) runs out; the interval would not.
+        act(() => {
+            vi.advanceTimersByTime(5000);
+        });
+        expect(vi.getTimerCount()).toBe(0);
+    });
+
+    /**
+     * #416: `ids[0..5]` top level (4..124), the group's header (124..144, bottom half 134..144),
+     * then the group's members when it is expanded, then the rest of `ids` top level.
+     */
+    const groupID = 'cccccccc-0000-4000-8000-000000000416';
+    const withGroup =
+        (collapsed: boolean, membersFrom = 6, membersTo = 8) =>
+        (): ChromeSidebarEntry[] => [
+            ...ids.slice(0, membersFrom).map((id, index) => ({
+                kind: 'workspace' as const,
+                workspace: workspace(id, `w${String(index + 1)}`)
+            })),
+            {
+                kind: 'group',
+                group: { id: groupID, name: 'squad', color: null, icon: null, isCollapsed: collapsed },
+                workspaces: ids
+                    .slice(membersFrom, membersTo)
+                    .map((id, index) => workspace(id, `m${String(index + 1)}`))
+            },
+            ...ids.slice(membersTo).map((id, index) => ({
+                kind: 'workspace' as const,
+                workspace: workspace(id, `w${String(membersTo + index + 1)}`)
+            }))
+        ];
+    function headerTinted(): boolean {
+        return screen.getByTestId('group-header').dataset['dropPreview'] === 'true';
+    }
+
+    it('a header passing under the band offers the slot under it, not an append, and the release lands there (#416)', () => {
+        const { list, onMoveWorkspace } = mount(224, withGroup(false));
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[0] as HTMLElement, { clientY: 10 });
+        list.scrollTop = 50;
+        // Content y 138: the header's bottom half, entered from the band with the list able to scroll.
+        fireEvent.mouseMove(window, { clientY: 88 });
+        expect(list.dataset['dragY']).toBe('138');
+        expect(list.dataset['dragTarget']).toBe(`intoGroup:${groupID}:0`);
+        expect(headerTinted()).toBe(false);
+        fireEvent.mouseUp(window);
+        expect(onMoveWorkspace).toHaveBeenCalledWith({ workspaceID: ids[0], groupID, index: 0 });
+    });
+
+    it('a collapsed header passing under the band offers the slot after the group (#416)', () => {
+        const { list, onMoveWorkspace } = mount(184, withGroup(true));
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[0] as HTMLElement, { clientY: 10 });
+        list.scrollTop = 50;
+        fireEvent.mouseMove(window, { clientY: 88 });
+        expect(list.dataset['dragY']).toBe('138');
+        // Top level once w1 is out: [w2..w6, squad, w9, w10], so after the group is 6.
+        expect(list.dataset['dragTarget']).toBe('topLevel:6');
+        expect(headerTinted()).toBe(false);
+        fireEvent.mouseUp(window);
+        expect(onMoveWorkspace).toHaveBeenCalledWith({ workspaceID: ids[0], groupID: null, index: 6 });
+    });
+
+    it('a whole sweep past a header never offers ontoGroupHeader nor tints it (#416)', () => {
+        for (const [collapsed, contentHeight] of [
+            [false, 224],
+            [true, 184]
+        ] as const) {
+            const { list } = mount(contentHeight, withGroup(collapsed));
+            fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[0] as HTMLElement, { clientY: 10 });
+            fireEvent.mouseMove(window, { clientY: 88 });
+            // Reverting the resolver's header branch makes this read ontoGroupHeader mid-sweep,
+            // so the sweep does carry the header past the pointer.
+            let ticks = 0;
+            for (; ticks < 60 && list.dataset['dragAutoscroll'] === 'true'; ticks += 1) {
+                expect(list.dataset['dragTarget']).not.toMatch(/^ontoGroupHeader/);
+                expect(headerTinted()).toBe(false);
+                tick();
+            }
+            expect(ticks).toBeGreaterThan(10);
+            expect(list.dataset['dragAutoscroll']).toBe('false');
+            fireEvent.mouseUp(window);
+            cleanup();
+            vi.useRealTimers();
+        }
+    });
+
+    it('a header in the band once the list cannot scroll appends again (#416)', () => {
+        // The group last: w1..w9 top level (4..184), the collapsed header 184..204.
+        const { list } = mount(204, withGroup(true, 9, 10));
+        fireEvent.mouseDown(screen.getAllByTestId('workspace-row')[0] as HTMLElement, { clientY: 10 });
+        list.scrollTop = 104;
+        fireEvent.mouseMove(window, { clientY: 90 });
+        expect(list.dataset['dragY']).toBe('194');
+        expect(list.dataset['dragTarget']).toBe(`ontoGroupHeader:${groupID}`);
+        expect(headerTinted()).toBe(true);
+        fireEvent.mouseUp(window);
     });
 
     it('nests as before outside the band, or in a band the list cannot scroll toward', () => {
