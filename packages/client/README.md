@@ -115,6 +115,18 @@ API. The escape hatch is a build-time flag:
 VITE_TERMINAL_ENGINE=xterm pnpm --filter @kelpi/client build
 ```
 
+The same variable drives a UI scenario or the audit against the fallback engine, because
+the harness builds the client in the environment it was started with and keys its build cache
+on every `VITE_*` variable:
+
+```bash
+VITE_TERMINAL_ENGINE=xterm node scripts/scenario.mjs typed-keys-arrive-once
+```
+
+Every harness run in a worktree builds into the same `packages/client/dist`, so do not start an
+xterm run while a default-engine run (an audit, `verify.mjs`) is going in the same worktree: the
+second build replaces the bundle under the first.
+
 Both engines sit behind `TerminalRenderer` (`src/terminal/renderer.ts`) and are code-split, so
 only the selected one is downloaded. The xterm build additionally pulls in
 `@xterm/xterm/css/xterm.css`, which `main.tsx` imports **only** for that engine. Known
