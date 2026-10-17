@@ -4322,33 +4322,46 @@ function buildFlows(ctx) {
         {
             id: 'workspace-create-cli',
             expect:
-                '`kelpi workspace create` adds a workspace AND the window follows it — the new workspace becomes the one you are looking at, the way it does when you create one from the sidebar.',
+                '`kelpi workspace create` adds a workspace in the BACKGROUND (#307): the new row appears in the sidebar and the window and the daemon both stay on the workspace you were looking at. With `--focus` the window follows the new workspace, the way it does when you create one from the sidebar.',
             needsEyes: true,
             async run(recorder) {
                 const before = await page.eval(`document.querySelectorAll('${PAGE.workspaceRows}').length`);
+                const identity = async () =>
+                    String(await page.eval(`(document.querySelector('[data-testid="top-bar-identity"]')?.innerText ?? '').split('\\n')[0].trim()`));
+                const daemonActiveName = async () => (await cli.json(['workspace', 'list', '--json'])).find((workspace) => workspace.is_active)?.name ?? null;
+                const shownBefore = await identity();
+                const activeBefore = await daemonActiveName();
                 const reply = await cli.json(['workspace', 'create', '--name', 'Audit CLI', '--json']);
                 recorder.note(`create reply: ${JSON.stringify(reply)}`);
                 await sleep(2500);
                 await recorder.shot(page);
                 const after = await page.eval(`document.querySelectorAll('${PAGE.workspaceRows}').length`);
                 recorder.check('the new workspace appears in the sidebar', after === before + 1, `${String(before)} → ${String(after)}`);
+                const shownAfter = await identity();
+                const activeAfter = await daemonActiveName();
+                recorder.note(`background create: window "${shownBefore}" → "${shownAfter}" · daemon active ${String(activeBefore)} → ${String(activeAfter)}`);
+                recorder.check('the window stays on the workspace it was showing', shownAfter === shownBefore, `"${shownBefore}" → "${shownAfter}"`);
+                recorder.check(
+                    'the daemon keeps its active workspace, so it and the window still agree',
+                    activeAfter === activeBefore && activeAfter !== 'Audit CLI' && shownAfter.includes(String(activeAfter)),
+                    `daemon ${String(activeBefore)} → ${String(activeAfter)}, window shows "${shownAfter}"`
+                );
 
-                // Poll both sides: the question is whether they AGREE, not whether either moved.
+                // --focus: both sides move, and they AGREE.
+                await cli.json(['workspace', 'create', '--name', 'Audit CLI Focus', '--focus', '--json']);
                 let daemonActive = null;
                 let uiIdentity = '';
                 for (let attempt = 0; attempt < 8; attempt++) {
-                    const list = await cli.json(['workspace', 'list', '--json']);
-                    daemonActive = list.find((workspace) => workspace.is_active)?.name ?? null;
-                    uiIdentity = String(
-                        await page.eval(`(document.querySelector('[data-testid="top-bar-identity"]')?.innerText ?? '').split('\\n')[0].trim()`)
-                    );
-                    if (daemonActive === 'Audit CLI' && uiIdentity.includes('Audit CLI')) break;
+                    daemonActive = await daemonActiveName();
+                    uiIdentity = await identity();
+                    if (daemonActive === 'Audit CLI Focus' && uiIdentity.includes('Audit CLI Focus')) break;
                     await sleep(600);
                 }
-                recorder.note(`after ~5s: daemon active=${String(daemonActive)} · window shows="${uiIdentity}"`);
-                recorder.check('the daemon made the new workspace active', daemonActive === 'Audit CLI', String(daemonActive));
+                await recorder.shot(page, 'focus');
+                recorder.note(`--focus: daemon active=${String(daemonActive)} · window shows="${uiIdentity}"`);
+                recorder.check('with --focus the daemon made the new workspace active', daemonActive === 'Audit CLI Focus', String(daemonActive));
                 recorder.check(
-                    'the window is showing the workspace the daemon calls active',
+                    'with --focus the window is showing the workspace the daemon calls active',
                     uiIdentity.includes(String(daemonActive)),
                     `window shows "${uiIdentity}" while the daemon calls "${String(daemonActive)}" active`
                 );
@@ -4359,6 +4372,7 @@ function buildFlows(ctx) {
                     `panes showing "terminal renderer failed to start": ${JSON.stringify(failedCLI)}`
                 );
                 // Leave the audit where the later flows expect it.
+                await cli.run(['workspace', 'delete', 'Audit CLI Focus', '--force']);
                 await cli.run(['workspace', 'delete', 'Audit CLI', '--force']);
                 await sleep(1500);
             }
@@ -5310,7 +5324,7 @@ function buildFlows(ctx) {
                 '`kelpi diff <repo>` opens a diff pane with per-file collapsible sections and GitHub-style green additions / red deletions for both changed files.',
             needsEyes: true,
             async run(recorder) {
-                const output = await cli.ok(['diff'], { cwd: repo });
+                const output = await cli.ok(['diff', '--focus'], { cwd: repo });
                 recorder.note(`cli: ${output.trim()}`);
                 await sleep(2200);
                 await recorder.shot(page);
@@ -8204,7 +8218,7 @@ function buildFlows(ctx) {
             needsEyes: true,
             async run(recorder) {
                 const workspaceName = 'n26-popup-layering';
-                const created = await cli.run(['workspace', 'create', '--name', workspaceName], { timeoutMs: 40_000 });
+                const created = await cli.run(['workspace', 'create', '--focus', '--name', workspaceName], { timeoutMs: 40_000 });
                 recorder.check('a scratch workspace for this step exists', created.code === 0, created.stdout.trim() || created.stderr.trim());
                 if (created.code !== 0) return;
                 // SETTLE-WAIT (was sleep(1500)): the new workspace is the ACTIVE one on screen —
@@ -9439,7 +9453,7 @@ function buildFlows(ctx) {
                 'Opening a menu over a web pane swaps the live page for a still frame of itself with no gap and no movement: the picture is painted BEFORE the shell takes the view back to the holder, every sampled frame while the pane is parked carries it, and it stands on exactly the box the view was placed at (issue #12).',
             async run(recorder) {
                 const workspaceName = 'poster-swap';
-                const created = await cli.run(['workspace', 'create', '--name', workspaceName], { timeoutMs: 40_000 });
+                const created = await cli.run(['workspace', 'create', '--focus', '--name', workspaceName], { timeoutMs: 40_000 });
                 recorder.check('a scratch workspace for this step exists', created.code === 0, created.stdout.trim());
                 if (created.code !== 0) return;
 
@@ -11281,7 +11295,7 @@ function buildFlows(ctx) {
                 recorder.check('there is an active workspace to jump away from', activeBefore !== '', activeBefore);
                 if (activeBefore === '') return;
 
-                const created = await cli.json(['workspace', 'create', '--name', 'Popover Jump', '--json']);
+                const created = await cli.json(['workspace', 'create', '--focus', '--name', 'Popover Jump', '--json']);
                 const targetWorkspaceID = String(created.workspace_id ?? '');
                 recorder.check('a second workspace to jump TO', targetWorkspaceID !== '', JSON.stringify(created));
                 if (targetWorkspaceID === '') return;
@@ -12681,7 +12695,7 @@ function buildFlows(ctx) {
                 let workspaces = await cli.json(['workspace', 'list', '--json']);
                 // Self-provisioning, so the step stands alone under `--only`.
                 if (workspaces.length < 2) {
-                    await cli.ok(['workspace', 'create', '--name', 'Bulk Two']);
+                    await cli.ok(['workspace', 'create', '--focus', '--name', 'Bulk Two']);
                     await sleep(1500);
                     workspaces = await cli.json(['workspace', 'list', '--json']);
                 }
@@ -15321,7 +15335,7 @@ function buildFlows(ctx) {
                  * Everything below happens in a workspace this step creates and deletes, so no
                  * later flow inherits a pane in bracketed-paste mode, a sync group, or a zoom.
                  */
-                const created = await cli.json(['workspace', 'create', '--name', 'Host Edges', '--json']);
+                const created = await cli.json(['workspace', 'create', '--focus', '--name', 'Host Edges', '--json']);
                 const edgesID = String(created?.workspace_id ?? '');
                 recorder.check('a scratch workspace to work in', edgesID !== '', JSON.stringify(created));
                 if (edgesID === '') return;
@@ -17425,7 +17439,7 @@ function buildFlows(ctx) {
                 '⌘W on the LAST pane of a workspace deletes the workspace rather than leaving an empty one behind; with no running agents, nothing is asked first.',
             needsEyes: true,
             async run(recorder) {
-                const created = await cli.json(['workspace', 'create', '--name', 'ephemeral', '--json']);
+                const created = await cli.json(['workspace', 'create', '--focus', '--name', 'ephemeral', '--json']);
                 await sleep(2000);
                 const workspaceID = String(created.workspace_id);
                 recorder.note(`created workspace ${workspaceID}`);
@@ -20813,8 +20827,8 @@ function buildFlows(ctx) {
                  * performs to get into the state they complained about.
                  */
                 await cli.ok(['group', 'create', 'Ring Band']);
-                await cli.ok(['workspace', 'create', '--name', 'Ring Active', '--group', 'Ring Band']);
-                await cli.ok(['workspace', 'create', '--name', 'Ring Below', '--group', 'Ring Band']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Ring Active', '--group', 'Ring Band']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Ring Below', '--group', 'Ring Band']);
                 const listed = await cli.json(['workspace', 'list', '--json']);
                 const activeID = listed.find((workspace) => workspace.name === 'Ring Active')?.id ?? null;
                 const belowID = listed.find((workspace) => workspace.name === 'Ring Below')?.id ?? null;
@@ -21087,8 +21101,8 @@ function buildFlows(ctx) {
             async run(recorder) {
                 // A group with a member, collapsed, plus a top-level workspace to drag into it.
                 await cli.run(['group', 'create', 'Drop Target']);
-                await cli.ok(['workspace', 'create', '--name', 'Nested One', '--group', 'Drop Target']);
-                await cli.ok(['workspace', 'create', '--name', 'Dragged One']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Nested One', '--group', 'Drop Target']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Dragged One']);
                 await page.waitFor(
                     `Array.from(document.querySelectorAll('[data-testid="workspace-row"]')).some(el => (el.innerText ?? '').includes('Dragged One'))`,
                     { timeoutMs: 20_000, label: 'the dragged row' }
@@ -21800,8 +21814,8 @@ function buildFlows(ctx) {
                  * By this point in a full run most workspaces live inside a group, so the two
                  * top-level rows this needs are created rather than assumed.
                  */
-                await cli.ok(['workspace', 'create', '--name', 'Slot A']);
-                await cli.ok(['workspace', 'create', '--name', 'Slot B']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Slot A']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Slot B']);
                 await page.waitFor(
                     `Array.from(document.querySelectorAll('[data-testid="workspace-row"]')).some(el => (el.innerText ?? '').includes('Slot B'))`,
                     { timeoutMs: 20_000, label: 'the second slot row' }
@@ -22486,7 +22500,7 @@ function buildFlows(ctx) {
                 recorder.check('and clears', filterCleared === '', JSON.stringify(filterCleared));
 
                 // ── §WS-008: a newly inserted row plays its entry ────────────────────
-                await cli.ok(['workspace', 'create', '--name', 'Springy']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Springy']);
                 // The animation is 350ms; poll for the first frame that carries the flag rather
                 // than hoping one round trip lands inside the window.
                 let entered = { flagged: 0, animation: null };
@@ -22933,7 +22947,7 @@ function buildFlows(ctx) {
                 );
                 await cli.run(['group', 'create', 'Overflow']);
                 for (let n = 1; n <= 12; n++) {
-                    await cli.run(['workspace', 'create', '--name', `Bulk ${String(n)}`, '--group', 'Overflow']);
+                    await cli.run(['workspace', 'create', '--focus', '--name', `Bulk ${String(n)}`, '--group', 'Overflow']);
                 }
                 await page.waitFor(
                     `Array.from(document.querySelectorAll('[data-testid="workspace-row"]')).some(el => (el.innerText ?? '').includes('Bulk 12'))`,
@@ -23211,9 +23225,9 @@ function buildFlows(ctx) {
                  * drag across. Everything here is created by the step and deleted at the end.
                  */
                 await cli.run(['group', 'create', 'Springboard']);
-                await cli.ok(['workspace', 'create', '--name', 'Spring Nested', '--group', 'Springboard']);
+                await cli.ok(['workspace', 'create', '--focus', '--name', 'Spring Nested', '--group', 'Springboard']);
                 for (let n = 1; n <= 4; n++) {
-                    await cli.ok(['workspace', 'create', '--name', `Spring ${String(n)}`]);
+                    await cli.ok(['workspace', 'create', '--focus', '--name', `Spring ${String(n)}`]);
                 }
                 await page.waitFor(
                     `Array.from(document.querySelectorAll('[data-testid="workspace-row"]')).some(el => (el.innerText ?? '').includes('Spring 4'))`,
@@ -24362,7 +24376,7 @@ function buildFlows(ctx) {
                             // deleted by `handBack` (a no-op when it never landed).
                             const name = `Spring Sweep ${String(sweepPads.length + 1)}`;
                             sweepPads.push(name);
-                            await cli.ok(['workspace', 'create', '--name', name]);
+                            await cli.ok(['workspace', 'create', '--focus', '--name', name]);
                         }
                         const lastPad = sweepPads.at(-1) ?? '';
                         await page.waitFor(
@@ -27976,7 +27990,7 @@ function buildFlows(ctx) {
 
                 // ── the rows this step owns, provisioned rather than inherited ───────
                 for (const name of ['Remain A', 'Remain B', 'Remain C']) {
-                    await cli.ok(['workspace', 'create', '--name', name]);
+                    await cli.ok(['workspace', 'create', '--focus', '--name', name]);
                 }
                 await page.waitFor(
                     `Array.from(document.querySelectorAll('${PAGE.workspaceRows}')).some(el => (el.innerText ?? '').includes('Remain C'))`,
@@ -28972,7 +28986,7 @@ function buildFlows(ctx) {
 
                 // ── the fixture this step owns, provisioned rather than inherited ────
                 for (const name of ['Edge A', 'Edge B']) {
-                    await cli.ok(['workspace', 'create', '--name', name]);
+                    await cli.ok(['workspace', 'create', '--focus', '--name', name]);
                 }
                 await cli.ok(['group', 'create', 'Edge Group']);
                 await cli.ok(['workspace', 'move', 'Edge A', '--group', 'Edge Group']);
@@ -29492,7 +29506,7 @@ function buildFlows(ctx) {
                 let overhang = await listOverhang();
                 for (let attempt = 0; overhang <= 0 && attempt < 24; attempt++) {
                     const name = `Fold Pad ${String(attempt)}`;
-                    await cli.ok(['workspace', 'create', '--name', name]);
+                    await cli.ok(['workspace', 'create', '--focus', '--name', name]);
                     foldPads.push(name);
                     await page.waitFor(
                         `Array.from(document.querySelectorAll('${PAGE.workspaceRows}')).some(el => (el.innerText ?? '').includes(${JSON.stringify(name)}))`,
@@ -36130,7 +36144,7 @@ function buildFlows(ctx) {
                  * the step still hands back exactly the one workspace it always did.
                  */
                 for (const name of ['Select A', 'Select B']) {
-                    await cli.run(['workspace', 'create', '--name', name]);
+                    await cli.run(['workspace', 'create', '--focus', '--name', name]);
                 }
                 // SETTLE-WAIT (was sleep(1500)): both new rows are drawn in the sidebar — the
                 // selection assertions below count rows, so a sidebar still catching up would be
@@ -36218,7 +36232,7 @@ function buildFlows(ctx) {
                 // really builds a workspace back out of the button it is asserting.
                 const before = await cli.json(['workspace', 'list', '--json']);
                 recorder.note(`deleting ${String(before.length)} workspaces to reach the empty state`);
-                const scratch = await cli.json(['workspace', 'create', '--name', 'Mac Chrome', '--json']);
+                const scratch = await cli.json(['workspace', 'create', '--focus', '--name', 'Mac Chrome', '--json']);
                 const scratchID = String(scratch?.workspace_id ?? '');
                 recorder.check('a fresh single-pane workspace to spend on the empty state', scratchID !== '');
                 // SETTLE-WAIT (was sleep(1500)): the scratch workspace's row is drawn, so the
