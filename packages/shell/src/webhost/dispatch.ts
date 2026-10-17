@@ -129,6 +129,9 @@ export type EvalOutcome =
     | { readonly ok: true; readonly value: unknown }
     | { readonly ok: false; readonly error: string };
 
+/** What `TabController.focusView` did (issue #351). */
+export type FocusViewOutcome = 'focused' | 'deferred' | 'none';
+
 /** One live tab. `./tab.ts` is the Electron implementation; tests pass a fake. */
 export interface TabController {
     readonly paneID: string;
@@ -148,7 +151,11 @@ export interface TabController {
      * and have the verb answer honestly instead of crashing.
      */
     stop?(): void;
-    focusView?(): void;
+    /**
+     * Issue #351: `'deferred'` when the view is parked and the page takes the keyboard once it is
+     * placed again (`./deferred-focus.ts`); `'none'` when there was no way to focus it.
+     */
+    focusView?(): FocusViewOutcome | void;
     /** Main frame, page world, `awaitPromise:true, returnByValue:true` (§8.2). */
     evaluate(expression: string): Promise<EvalOutcome>;
     /** Visible-viewport PNG (§8.4). Rejects/throws are turned into the spec's failure envelope. */
@@ -837,8 +844,8 @@ export function createVerbDispatcher<V extends TabController>(deps: DispatchDeps
                 const found = tabOf(args);
                 if ('error' in found) return found.error;
                 if (found.tab.focusView === undefined) return failure('this host cannot focus a view');
-                found.tab.focusView();
-                return OK;
+                const outcome = found.tab.focusView();
+                return outcome === 'deferred' ? { ok: true, deferred: true } : OK;
             }
             /*
              * The inverse of `focus-view` (issue #33): the client is taking the keyboard back.
