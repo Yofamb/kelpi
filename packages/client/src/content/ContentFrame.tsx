@@ -36,6 +36,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
 import { PANE_HEADER_HEIGHT } from '../grid/PaneHeader';
+import { usePluginStyleSet } from '../plugins/styles';
 import { PaneSearchOverlay } from '../grid/PaneSearchOverlay';
 import {
     CONTENT_HOST_SOURCE,
@@ -219,6 +220,8 @@ export function ContentFrame(props: ContentFrameProps): ReactElement {
      * keeps the seed from going stale.
      */
     const seedChords = props.claimedChords ?? EMPTY_CHORDS;
+    // Theme plugins' `documents` sheets (`plugins/styles.tsx`); a change rebuilds the document.
+    const documentStyles = usePluginStyleSet().documents;
     const srcDoc = useMemo(
         () =>
             prepareContentDocument(html, {
@@ -227,9 +230,10 @@ export function ContentFrame(props: ContentFrameProps): ReactElement {
                 background: documentBackground,
                 colorScheme,
                 findPalette: props.findPalette,
+                styles: documentStyles,
                 claimedChords: seedChords
             }),
-        [html, paneID, props.assetBase, documentBackground, colorScheme, props.findPalette, seedChords]
+        [html, paneID, props.assetBase, documentBackground, colorScheme, props.findPalette, documentStyles, seedChords]
     );
 
     // ── find-in-page (§3.13), per client ────────────────────────────────────────────

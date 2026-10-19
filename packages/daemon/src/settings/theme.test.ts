@@ -374,6 +374,18 @@ describe('buildSettingsSnapshot with a theme resolver', () => {
         expect(snapshot.appearance.isDark).toBe(false);
     });
 
+    it('says whether anyone chose the background, so a theme plugin may replace an unchosen one', () => {
+        expect(buildSettingsSnapshot('', '').appearance.backgroundConfigured).toBe(false);
+        expect(buildSettingsSnapshot('', 'background = #102030\n').appearance.backgroundConfigured).toBe(true);
+        const themed = buildSettingsSnapshot('', 'theme = Nord\n', { resolveTheme: resolver({ background: '#2e3440' }) });
+        expect(themed.appearance.backgroundConfigured).toBe(true);
+        // A theme that resolves without a background, or not at all, chose nothing.
+        const paletteOnly = buildSettingsSnapshot('', 'theme = Nord\n', { resolveTheme: resolver({ red: '#bf616a' }) });
+        expect(paletteOnly.appearance.backgroundConfigured).toBe(false);
+        const missing = buildSettingsSnapshot('', 'theme = Made Up\n', { resolveTheme: resolver({}, 'no such theme') });
+        expect(missing.appearance.backgroundConfigured).toBe(false);
+    });
+
     it('keeps today’s behaviour, plus a note, when the name does not resolve', () => {
         const snapshot = buildSettingsSnapshot('', 'theme = Made Up\n', {
             resolveTheme: (name) => ({ name, path: null, palette: {}, error: 'no such theme' })

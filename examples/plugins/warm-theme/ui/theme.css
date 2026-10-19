@@ -1,0 +1,621 @@
+/**
+ * Warm — soft warm neutrals, a clay accent and panes on rounded cards, as a Kelpi theme plugin.
+ *
+ * Two halves. The PALETTE overrides Kelpi's `--kelpi-*` chrome tokens and its `--kelpi-term-*`
+ * terminal tokens for each appearance; the SHAPE puts panes on rounded cards with gutters,
+ * quiets the rules between title bar, sidebar and status bar, and gives the phone rounded
+ * sheets. Kelpi writes its chrome palette inline on the theme roots (the elements carrying
+ * `data-kelpi-theme`), so every token here is `!important`: that is the one way a stylesheet
+ * wins against an inline declaration.
+ *
+ * The terminal tokens are set on `:root` alone. They are the palette for terminals whose
+ * colours nobody chose; a `theme` or `background` line in your ghostty config is written onto
+ * the app's own theme root, below `:root`, so it still wins and your terminal theme is left
+ * alone.
+ *
+ * The selectors are the `data-testid` / `data-*` hooks Kelpi's components already expose. They
+ * are not a frozen API: a Kelpi release that renames one can leave a rule here matching nothing,
+ * which degrades to Kelpi's own look for that piece rather than breaking anything.
+ *
+ * Charter ships with macOS; Bitstream Charter is the same face on Linux.
+ */
+
+/* ── palette ──────────────────────────────────────────────────────────────────────────── */
+
+:root {
+  --kelpi-font-serif: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
+}
+
+[data-kelpi-theme='dark'] {
+  --kelpi-bg: #1f1e1d !important;
+  --kelpi-window-fill: #1f1e1d !important;
+  --kelpi-sidebar-bg: #1f1e1d !important;
+  --kelpi-surface: #2c2b28 !important;
+  --kelpi-surface-bg: #2c2b28 !important;
+  --kelpi-header-bg: #262624 !important;
+  --kelpi-footer-bg: #1f1e1d !important;
+  --kelpi-fg: #f0eee6 !important;
+  --kelpi-fg-secondary: #b4b1a7 !important;
+  --kelpi-fg-tertiary: #85837b !important;
+  --kelpi-border: #3a3935 !important;
+  --kelpi-selection-fill: rgba(217, 119, 87, 0.16) !important;
+  --kelpi-selection-stroke: #d97757 !important;
+  --kelpi-accent: #d97757 !important;
+  --kelpi-pane-focus: #d97757 !important;
+  --kelpi-status-running: #8cbf7f !important;
+  --kelpi-status-waiting: #d97757 !important;
+  --kelpi-status-inactive: #87857e !important;
+  --kelpi-active-agent: #d9a35b !important;
+  --kelpi-agent: #d9a35b !important;
+  --kelpi-orange: #e08a5e !important;
+  --kelpi-group-band-opacity: 0.16 !important;
+}
+
+:root[data-kelpi-theme='dark'] {
+  --kelpi-term-bg: #262624 !important;
+  --kelpi-term-fg: #f0eee6 !important;
+  --kelpi-term-cursor: #d97757 !important;
+  --kelpi-term-cursor-accent: #262624 !important;
+  --kelpi-term-selection-bg: #5c3e33 !important;
+  --kelpi-term-selection-fg: #faf9f5 !important;
+  --kelpi-term-black: #3a3936 !important;
+  --kelpi-term-red: #e07b6e !important;
+  --kelpi-term-green: #a4c58e !important;
+  --kelpi-term-yellow: #e6c07a !important;
+  --kelpi-term-blue: #86aedd !important;
+  --kelpi-term-magenta: #c9a0d6 !important;
+  --kelpi-term-cyan: #82c4b8 !important;
+  --kelpi-term-white: #c2c0b6 !important;
+  --kelpi-term-bright-black: #86847c !important;
+  --kelpi-term-bright-red: #ee9a8e !important;
+  --kelpi-term-bright-green: #bcd7aa !important;
+  --kelpi-term-bright-yellow: #f0d39c !important;
+  --kelpi-term-bright-blue: #a6c4e8 !important;
+  --kelpi-term-bright-magenta: #dbbae3 !important;
+  --kelpi-term-bright-cyan: #a2d6cc !important;
+  --kelpi-term-bright-white: #faf9f5 !important;
+}
+
+[data-kelpi-theme='light'] {
+  --kelpi-bg: #f0eee6 !important;
+  --kelpi-window-fill: #f0eee6 !important;
+  --kelpi-sidebar-bg: #f0eee6 !important;
+  --kelpi-surface: #ffffff !important;
+  --kelpi-surface-bg: #ffffff !important;
+  --kelpi-header-bg: #faf9f5 !important;
+  --kelpi-footer-bg: #f0eee6 !important;
+  --kelpi-fg: #1f1e1d !important;
+  --kelpi-fg-secondary: #5f5e59 !important;
+  --kelpi-fg-tertiary: #8f8d86 !important;
+  --kelpi-border: #dddbd2 !important;
+  --kelpi-selection-fill: rgba(201, 100, 66, 0.12) !important;
+  --kelpi-selection-stroke: #c96442 !important;
+  --kelpi-accent: #c96442 !important;
+  --kelpi-pane-focus: #c96442 !important;
+  --kelpi-status-running: #5b8f4e !important;
+  --kelpi-status-waiting: #c96442 !important;
+  --kelpi-status-inactive: #9c9a92 !important;
+  --kelpi-active-agent: #a8732a !important;
+  --kelpi-agent: #a8732a !important;
+  --kelpi-orange: #b5602f !important;
+  --kelpi-group-band-opacity: 0.22 !important;
+}
+
+:root[data-kelpi-theme='light'] {
+  --kelpi-term-bg: #faf9f5 !important;
+  --kelpi-term-fg: #1f1e1d !important;
+  --kelpi-term-cursor: #c96442 !important;
+  --kelpi-term-cursor-accent: #faf9f5 !important;
+  --kelpi-term-selection-bg: #f1d9cc !important;
+  --kelpi-term-selection-fg: #1f1e1d !important;
+  --kelpi-term-black: #3d3d3a !important;
+  --kelpi-term-red: #bf4a3d !important;
+  --kelpi-term-green: #4e8044 !important;
+  --kelpi-term-yellow: #9c6b10 !important;
+  --kelpi-term-blue: #2f6bb0 !important;
+  --kelpi-term-magenta: #8a4fa3 !important;
+  --kelpi-term-cyan: #2d7d74 !important;
+  --kelpi-term-white: #d8d6cc !important;
+  --kelpi-term-bright-black: #8b8982 !important;
+  --kelpi-term-bright-red: #d4604f !important;
+  --kelpi-term-bright-green: #649958 !important;
+  --kelpi-term-bright-yellow: #b5852a !important;
+  --kelpi-term-bright-blue: #4a85c9 !important;
+  --kelpi-term-bright-magenta: #a36abb !important;
+  --kelpi-term-bright-cyan: #3e978d !important;
+  --kelpi-term-bright-white: #ffffff !important;
+}
+
+/* ── one ground ───────────────────────────────────────────────────────────────────────── */
+
+/* Title bar, sidebar and status bar share `--kelpi-bg`; the rules between them only cut it up. */
+[data-testid='top-bar'] {
+  border-bottom-color: transparent !important;
+}
+
+[data-testid='status-footer'] {
+  border-top-color: transparent !important;
+}
+
+[data-testid='sidebar'] > div:has([data-testid='sidebar-new-workspace']) {
+  border-top-color: transparent !important;
+}
+
+/* The sidebar's edge shows itself only where it can be grabbed. */
+[data-testid='sidebar-resizer'] > div {
+  background: transparent !important;
+  transition: background 120ms ease-out;
+}
+
+[data-testid='sidebar-resizer']:hover > div {
+  background: var(--kelpi-border) !important;
+}
+
+/* ── panes are cards ──────────────────────────────────────────────────────────────────── */
+
+/*
+ * Gutters without touching the layout maths. `PaneGrid` measures its own box minus its border,
+ * and every pane measures its own body, so a transparent border on the grid insets the whole
+ * layout from the window edges, and a transparent border on each pane turns the 2 px divider
+ * between two rects into a 10 px gap between two cards. The terminal's cols and rows come from
+ * the smaller box, exactly as they do for a divider drag.
+ */
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] {
+  border-style: solid;
+  border-color: transparent;
+  border-width: 2px 6px 6px 2px;
+}
+
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] > [data-pane-id] {
+  border: 4px solid transparent;
+  /* 10 px on the card itself: the pane clips its contents to the inside of this border. */
+  border-radius: 14px;
+  background-clip: padding-box;
+  transition: border-color 160ms ease-out;
+}
+
+/* A hairline edge, drawn over the contents so a terminal cannot paint across it. */
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] > [data-pane-id]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kelpi-fg) 9%, transparent);
+  pointer-events: none;
+}
+
+/*
+ * Focus is a fine accent line plus a soft halo in the gutter, not a 2 px frame. The halo is the
+ * pane's own transparent border tinted, so it follows the card's corners for free, and it fades
+ * with the ring when the keyboard is elsewhere (the ring's `data-dimmed`, issue #174).
+ */
+:root:not([data-form-factor='phone']) [data-testid='focus-ring'] {
+  border-width: 1px !important;
+  border-radius: 10px !important;
+  border-color: color-mix(in srgb, var(--kelpi-pane-focus) 70%, transparent) !important;
+}
+
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] > [data-focused='true'] {
+  border-color: color-mix(in srgb, var(--kelpi-pane-focus) 12%, transparent);
+}
+
+:root:not([data-form-factor='phone'])
+  [data-testid='pane-grid']
+  > [data-focused='true']:has(> [data-testid='focus-ring'][data-dimmed='true']) {
+  border-color: color-mix(in srgb, var(--kelpi-pane-focus) 5%, transparent);
+}
+
+/* The 2 px bar between panes is a grab handle, so it appears under the pointer and nowhere else. */
+[data-testid^='divider-'][role='separator'] > div {
+  background: transparent !important;
+  border-radius: 2px;
+  transition: background 120ms ease-out;
+}
+
+[data-testid^='divider-'][role='separator']:hover > div,
+[data-testid^='divider-'][role='separator'][data-dragging='true'] > div {
+  background: color-mix(in srgb, var(--kelpi-accent) 60%, transparent) !important;
+}
+
+/* ── pane header ──────────────────────────────────────────────────────────────────────── */
+
+/* Same colour as the body below it, so no rule between them: the header is the card's top. */
+[data-pane-id] > [data-testid^='pane-header-'] {
+  box-shadow: none !important;
+  gap: 6px !important;
+  padding-left: 12px !important;
+  padding-right: 8px !important;
+}
+
+/* The pane's name is its title: plain type, not a tinted chip with a tag glyph. */
+[data-testid^='pane-label-'] {
+  background: transparent !important;
+  color: var(--kelpi-fg) !important;
+  font-family: var(--kelpi-font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  padding-left: 0 !important;
+}
+
+[data-testid^='pane-label-'] > svg {
+  display: none;
+}
+
+[data-testid^='pane-title-'] {
+  color: var(--kelpi-fg-secondary) !important;
+}
+
+[data-testid^='pane-status-dot-'] {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+[data-testid^='pane-branch-'] {
+  border-radius: 6px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+  color: var(--kelpi-fg-tertiary) !important;
+  background: color-mix(in srgb, var(--kelpi-fg) 6%, transparent) !important;
+}
+
+/* Split, web and close wait for the pointer. A keyboard focus still shows them. */
+:root:not([data-form-factor='phone']) [data-testid^='pane-header-'] button {
+  opacity: 0 !important;
+  border-radius: 6px !important;
+  transition:
+    opacity 120ms ease-out,
+    background 120ms ease-out;
+}
+
+:root:not([data-form-factor='phone']) [data-pane-id]:hover [data-testid^='pane-header-'] button,
+:root:not([data-form-factor='phone']) [data-testid^='pane-header-'] button:focus-visible {
+  opacity: 0.7 !important;
+}
+
+:root:not([data-form-factor='phone']) [data-testid^='pane-header-'] button:hover {
+  opacity: 1 !important;
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+/* ── sidebar ──────────────────────────────────────────────────────────────────────────── */
+
+[data-testid='sidebar'] div:has(> input[data-testid='sidebar-filter']) {
+  border-color: transparent !important;
+  border-radius: 9px !important;
+  background: color-mix(in srgb, var(--kelpi-fg) 5%, transparent) !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  transition: box-shadow 120ms ease-out;
+}
+
+[data-testid='sidebar'] div:has(> input[data-testid='sidebar-filter']):focus-within {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--kelpi-accent) 55%, transparent);
+}
+
+[data-testid='workspace-row'] {
+  border-radius: 8px !important;
+}
+
+/* The current workspace is a soft fill, not an accent outline. */
+[data-testid='workspace-row'][data-active='true'] {
+  outline: none !important;
+  background-color: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+[data-testid='workspace-row']:not([data-active='true']):not([data-selected='true']):hover {
+  background-color: color-mix(in srgb, var(--kelpi-fg) 4%, transparent) !important;
+}
+
+[data-testid='workspace-row'] .font-semibold {
+  font-weight: 500;
+}
+
+[data-testid='workspace-row'][data-active='true'] .font-semibold {
+  font-weight: 600;
+}
+
+[data-testid='group-header'] {
+  border-color: transparent !important;
+}
+
+/* ⌘1…⌘9 are there when you look for them: on the row under the pointer. */
+:root:not([data-form-factor='phone']) [data-testid='cmd-badge'] {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+:root:not([data-form-factor='phone']) [data-testid='workspace-row']:hover [data-testid='cmd-badge'] {
+  opacity: 1;
+}
+
+/* New Workspace as the one call to action: the plus in an accent disc. */
+[data-testid='sidebar-new-workspace'] {
+  color: var(--kelpi-fg) !important;
+  font-weight: 500;
+  gap: 9px !important;
+}
+
+[data-testid='sidebar-new-workspace'] > svg {
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--kelpi-accent);
+  color: #fff;
+}
+
+/* ── title bar and status bar ─────────────────────────────────────────────────────────── */
+
+/* The workspace name is the window's title, set in the theme's serif. */
+[data-testid='top-bar-identity'] > .font-semibold {
+  font-family: var(--kelpi-font-serif);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+[data-testid='layout-cycle'],
+[data-testid='connection-pill'] {
+  background: transparent !important;
+}
+
+[data-testid='layout-cycle']:hover,
+[data-testid='sync-toggle']:hover {
+  background: color-mix(in srgb, var(--kelpi-fg) 6%, transparent) !important;
+}
+
+[data-testid='status-footer'] {
+  color: var(--kelpi-fg-tertiary) !important;
+}
+
+/* ── surfaces: menus, palette, sheets, toasts ─────────────────────────────────────────── */
+
+:root {
+  --kelpi-skin-shadow: 0 16px 40px rgba(0, 0, 0, 0.36), 0 2px 8px rgba(0, 0, 0, 0.2);
+  --kelpi-skin-edge: color-mix(in srgb, var(--kelpi-fg) 10%, transparent);
+}
+
+:root[data-kelpi-theme='light'] {
+  --kelpi-skin-shadow: 0 16px 40px rgba(31, 30, 29, 0.12), 0 2px 8px rgba(31, 30, 29, 0.08);
+}
+
+:root:not([data-form-factor='phone']) [role='dialog'][class*='rounded'] {
+  border-radius: 12px !important;
+}
+
+[data-testid='context-menu'] {
+  border-radius: 12px !important;
+  padding: 5px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+[data-testid='context-menu'] [role='menuitem'],
+[data-testid='context-menu'] [role='menuitemcheckbox'] {
+  border-radius: 7px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+  font-size: 13px !important;
+}
+
+/* A neutral highlight rather than an accent wash. */
+[data-testid='context-menu'] [data-highlighted='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+[data-testid='command-palette'] {
+  border-radius: 14px !important;
+  border: 1px solid var(--kelpi-skin-edge);
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+[data-testid='command-palette'] > div:first-child {
+  border-bottom-color: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+  padding: 12px 16px !important;
+}
+
+[data-testid='command-palette'] > div:nth-child(2) {
+  padding: 6px !important;
+}
+
+[data-testid='palette-row'] {
+  border-radius: 8px;
+}
+
+[data-testid='palette-row'][data-selected='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+[data-testid='settings-window'] {
+  border-radius: 16px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+[data-testid='settings-toolbar'],
+[data-testid='settings-window'] > div:has(> label > [data-testid='settings-search']),
+[data-testid='settings-tabs'] {
+  background: transparent !important;
+  border-color: color-mix(in srgb, var(--kelpi-fg) 7%, transparent) !important;
+}
+
+[data-testid='settings-toolbar'] {
+  padding: 10px 14px !important;
+}
+
+[data-testid='settings-toolbar'] > .font-semibold,
+[data-testid='settings-panel'] h3 {
+  font-family: var(--kelpi-font-serif);
+  font-weight: 500;
+}
+
+[data-testid='settings-toolbar'] > .font-semibold {
+  font-size: 15px;
+}
+
+[data-testid='settings-panel'] h3 {
+  font-size: 16px;
+}
+
+[data-testid='settings-tabs'] [role='tab'] {
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+}
+
+[data-testid='settings-tabs'] [role='tab'][aria-selected='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+  color: var(--kelpi-fg) !important;
+}
+
+[data-testid='settings-search'] {
+  border-radius: 8px !important;
+}
+
+[data-settings-card='true'] {
+  border-radius: 10px !important;
+}
+
+[data-testid='toast-stack'] > * {
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+/* ── phone ────────────────────────────────────────────────────────────────────────────── */
+
+/*
+ * The phone: the header is the ground with a title on it rather than a toolbar, sheets are
+ * rounded cards with a grab handle, rows are big enough to read and to hit, and the key bar is a
+ * row of soft keys. Every control keeps its place and its `data-testid` (the phone audit taps
+ * them by it), so this is paint, not plumbing.
+ */
+[data-form-factor='phone'] [data-testid='phone-header'] {
+  background: var(--kelpi-bg) !important;
+  border-bottom-color: transparent !important;
+  min-height: 54px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* Header controls are quiet glyphs; the accent is kept for what a person acts on in a sheet. */
+[data-form-factor='phone'] [data-testid='phone-header'] > button:not([data-testid='phone-title']) {
+  color: var(--kelpi-fg-secondary) !important;
+  border-radius: 12px !important;
+}
+
+[data-form-factor='phone'] [data-testid='phone-header'] > button:not([data-testid='phone-title']):active {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent);
+}
+
+/* The workspace is the title, in the serif; the pane under it is the subtitle. */
+[data-form-factor='phone'] [data-testid='phone-title-workspace'] {
+  font-family: var(--kelpi-font-serif);
+  font-size: 18px !important;
+  line-height: 1.25;
+  color: var(--kelpi-fg) !important;
+}
+
+[data-form-factor='phone'] [data-testid='phone-title'] [data-testid^='pane-header-'] {
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: var(--kelpi-fg-secondary);
+}
+
+[data-form-factor='phone'] [data-testid='phone-pane-count'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11.5px !important;
+  font-weight: 600;
+  color: var(--kelpi-fg);
+  background: color-mix(in srgb, var(--kelpi-fg) 10%, transparent);
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] > [data-testid$='-scrim'] {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(2px);
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side='bottom'] > [role='dialog'] {
+  border-radius: 22px 22px 0 0 !important;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side='bottom'] > [role='dialog']::before {
+  content: '';
+  flex: none;
+  align-self: center;
+  width: 36px;
+  height: 5px;
+  margin: 8px 0 2px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--kelpi-fg) 22%, transparent);
+}
+
+/* The drawer is the sidebar's ground, lifted off the page by its shadow alone. */
+[data-form-factor='phone'] [data-phone-sheet-side='left'] > [role='dialog'] {
+  background: var(--kelpi-bg) !important;
+  border-radius: 0 22px 22px 0 !important;
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] [role='dialog'] > [data-testid$='-header'] {
+  border-bottom-color: transparent !important;
+  padding: 4px 8px 4px 20px !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] [role='dialog'] > [data-testid$='-header'] > .font-semibold {
+  font-size: 17px !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] button[data-active] {
+  min-height: 50px !important;
+  padding-left: 20px !important;
+  font-size: 16px !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] button[data-active='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 7%, transparent) !important;
+}
+
+/* The workspace list, at a size a thumb and an arm's length can both work with. */
+[data-form-factor='phone'] [data-testid='workspace-row'],
+[data-form-factor='phone'] [data-testid='group-header'] {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+  border-radius: 12px !important;
+}
+
+[data-form-factor='phone'] [data-testid='workspace-row'] .text-\[13px\],
+[data-form-factor='phone'] [data-testid='group-header'] .text-\[13px\] {
+  font-size: 16px !important;
+}
+
+[data-form-factor='phone'] [data-testid='phone-landing-hosts'] > [data-host-kind] {
+  border-radius: 18px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+}
+
+/*
+ * The keys keep their 44 px hit box; the key you SEE is the padding box, inset by a transparent
+ * border and clipped to it, so each one is a soft pill on the ground (lit modifiers stay accent).
+ */
+[data-form-factor='phone'] [data-testid^='terminal-key-bar-'] {
+  background-color: var(--kelpi-bg) !important;
+  border-top-color: transparent !important;
+  gap: 2px !important;
+  padding: 0 6px !important;
+}
+
+[data-form-factor='phone'] [data-testid^='terminal-key-bar-'] > button {
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-width: 5px 3px !important;
+  border-radius: 15px !important;
+  background-clip: padding-box !important;
+  font-size: 15px !important;
+}

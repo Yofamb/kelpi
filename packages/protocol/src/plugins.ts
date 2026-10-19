@@ -96,6 +96,32 @@ export interface PluginPaneDescriptor {
     readonly stateVersion: number;
     readonly state: JsonObject;
 }
+/**
+ * A theme stylesheet (`contributes.styles`). `window` styles the app itself; `documents` styles
+ * what markdown and diff panes render, inside their sandboxed frames. The client applies it for
+ * as long as the plugin is enabled; see "Themes" in `docs/plugins.md`.
+ */
+export type PluginStyleTarget = 'window' | 'documents';
+export interface PluginStyleDefinition {
+    readonly id: string;
+    /** A `.css` file under `ui/`. */
+    readonly entry: string;
+    readonly target: PluginStyleTarget;
+}
+/** A stylesheet's text, as the daemon read it from the selected revision. */
+export interface PluginStyleSheet {
+    readonly id: string;
+    readonly target: PluginStyleTarget;
+    readonly css: string;
+}
+/** One active plugin's stylesheets, as the `styles` action returns them, in manifest order. */
+export interface PluginStyles {
+    readonly pluginID: string;
+    readonly revision: string;
+    readonly styles: readonly PluginStyleSheet[];
+}
+/** Per stylesheet. A theme is a few hundred rules; anything far past that is a mistake. */
+export const PLUGIN_MAX_STYLE_BYTES = 128 * 1024;
 export interface PluginViewDefinition {
     readonly id: string;
     readonly title: string;
@@ -174,6 +200,7 @@ export interface PluginManifest {
         readonly items?: readonly PluginItemDefinition[];
         readonly settingGroups?: readonly PluginSettingGroupDefinition[];
         readonly cli?: readonly PluginCliContribution[];
+        readonly styles?: readonly PluginStyleDefinition[];
     };
 }
 export interface PluginInfo {
@@ -527,6 +554,14 @@ export function decodePluginManifest(raw: unknown): PluginManifest {
         if (choices) for (const choice of choices) pluginSettingValue(definition, choice);
         settings[key] = definition;
     }
+    const styles = array(contributes['styles']).map((raw): PluginStyleDefinition => {
+        const style = pluginObject(raw);
+        const entry = pluginAssetPath(style['entry']);
+        if (!entry.startsWith('ui/') || !entry.endsWith('.css')) throw new Error('style entry must be a CSS file under ui/');
+        const target = style['target'] ?? 'window';
+        if (target !== 'window' && target !== 'documents') throw new Error('style target must be window or documents');
+        return { id: contributionID(style['id']), entry, target };
+    });
     const activation = value['activation'] ?? 'on-demand';
     if (activation !== 'startup' && activation !== 'on-demand') throw new Error('invalid activation policy');
     return { id, name: label(value['name'] ?? id, 'name'), version, apiVersion: PLUGIN_API_VERSION, trust: 'full', activation,
@@ -536,7 +571,7 @@ export function decodePluginManifest(raw: unknown): PluginManifest {
             ...(containers.length ? { containers } : {}), ...(hooks.length ? { hooks } : {}),
             ...(services.length ? { services } : {}), ...(providers.length ? { providers } : {}),
             ...(menus.length ? { menus } : {}), ...(items.length ? { items } : {}), ...(settingGroups.length ? { settingGroups } : {}),
-            ...(cli.length ? { cli } : {}) } };
+            ...(cli.length ? { cli } : {}), ...(styles.length ? { styles } : {}) } };
 }
 
 export function decodePluginPane(raw: unknown): PluginPaneDescriptor | null {

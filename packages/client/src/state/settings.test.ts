@@ -56,6 +56,13 @@ describe('hydrateSettings', () => {
         expect(hydrateSettings(SETTINGS)).toEqual(SETTINGS);
     });
 
+    it('keeps backgroundConfigured when the daemon sends it, and leaves it absent when not', () => {
+        const unchosen = { ...SETTINGS, appearance: { ...SETTINGS.appearance, backgroundConfigured: false } };
+        expect(hydrateSettings(unchosen)?.appearance.backgroundConfigured).toBe(false);
+        // Absent reads as "configured" downstream, the behaviour before the field existed.
+        expect(hydrateSettings(SETTINGS)?.appearance).not.toHaveProperty('backgroundConfigured');
+    });
+
     it('falls back per field rather than blanking the whole snapshot', () => {
         const hydrated = hydrateSettings({
             keybindLines: ['a=b', 7, null],

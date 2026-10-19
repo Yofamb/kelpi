@@ -1,0 +1,63 @@
+/**
+ * Warm, for documents: what Kelpi's markdown and diff panes read in under the Warm theme.
+ *
+ * A `"target": "documents"` stylesheet is appended to the document of every markdown and diff
+ * pane, after the daemon's own GitHub-flavoured sheet, so these rules sit on top of it. `<html>`
+ * carries `dark` or `light` for the background the pane is actually painted on, which is what
+ * the `.dark` rules key on.
+ *
+ * Prose and headings in a book serif, the warm neutrals instead of GitHub's cool greys, and the
+ * clay accent for links, quotes and ticked tasks; diffs take the terminal palette's green and
+ * red.
+ */
+
+/* ── markdown ─────────────────────────────────────────────────────────────────────────── */
+
+body {
+    font-family: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
+    line-height: 1.65;
+    color: #1f1e1d;
+}
+.dark body { color: #e9e7df; }
+h1, h2, h3, h4, h5, h6 {
+    font-family: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
+    font-weight: 500;
+}
+h1, h2, hr { border-color: #e3e0d6; }
+.dark h1, .dark h2, .dark hr { border-color: #3a3935; }
+a { color: #b65738; }
+.dark a { color: #e0896b; }
+pre { background: #f0eee6; border-radius: 10px; }
+.dark pre { background: #1f1e1d; }
+:not(pre) > code { background: #ebe8df; }
+.dark :not(pre) > code { background: #34332f; }
+blockquote { border-left-color: #d97757; color: #6b6964; }
+.dark blockquote { border-left-color: #d97757; color: #a8a59b; }
+th, td, table.frontmatter, table.frontmatter th, table.frontmatter td { border-color: #e3e0d6; }
+th, table.frontmatter th { background: #f5f4ed; }
+.dark th, .dark td, .dark table.frontmatter, .dark table.frontmatter th, .dark table.frontmatter td { border-color: #3a3935; }
+.dark th, .dark table.frontmatter th { background: #2c2b28; }
+li.task-list-item > input.task-list-item-checkbox { border-color: #a8a59b; border-radius: 4px; }
+.dark li.task-list-item > input.task-list-item-checkbox { border-color: #85837b; }
+li.task-list-item > input.task-list-item-checkbox:checked { background-color: #c96442; border-color: #c96442; }
+.dark li.task-list-item > input.task-list-item-checkbox:checked { background-color: #d97757; border-color: #d97757; }
+
+/* ── diffs ───────────────────────────────────────────────────────────────────────────── */
+
+body { color: #1f1e1d; }
+.dark body { color: #e9e7df; }
+details.file > summary { color: #1f1e1d; background: #f5f4ed; border-top-color: #e3e0d6; border-bottom-color: #e3e0d6; }
+.dark details.file > summary { color: #e9e7df; background: #2c2b28; border-top-color: #3a3935; border-bottom-color: #3a3935; }
+.caret { color: #8f8d86; }
+.status-modified { background: rgba(201,100,66,0.14); color: #b65738; }
+.dark .status-modified { background: rgba(217,119,87,0.18); color: #e0896b; }
+.line-add { background: #e9f1e2; color: #4e8044; }
+.dark .line-add { background: rgba(164,197,142,0.12); color: #a4c58e; }
+.line-del { background: #f8e5df; color: #bf4a3d; }
+.dark .line-del { background: rgba(224,123,110,0.12); color: #e07b6e; }
+.stat-add { color: #4e8044; }   .dark .stat-add { color: #a4c58e; }
+.stat-del { color: #bf4a3d; }   .dark .stat-del { color: #e07b6e; }
+.line-hunk { background: #f0eee6; color: #6b6964; }
+.dark .line-hunk { background: rgba(240,238,230,0.05); color: #a8a59b; }
+.line-file-header, .empty { color: #6b6964; }
+.dark .line-file-header, .dark .empty { color: #a8a59b; }

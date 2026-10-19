@@ -365,6 +365,14 @@ export const DEFAULT_WS_TERMINAL_THEME: WsTerminalThemeResolution = {
 export interface WsAppearanceSettings {
     /** `#rrggbb` (lowercase). Always concrete — `isDark` is derived from it. */
     readonly backgroundColor: string;
+    /**
+     * Did `backgroundColor` come from the user — a `background = …` line, or a resolved `theme`
+     * that supplies one? False means it is `DEFAULT_SETTINGS_BACKGROUND`, which nobody chose, so a
+     * theme plugin's `--kelpi-term-bg` may paint the terminals instead (`docs/plugins.md`,
+     * Themes). Additive: a daemon that predates it omits the field, which reads as true, the
+     * behaviour before it existed.
+     */
+    readonly backgroundConfigured?: boolean;
     /** 0..1. */
     readonly backgroundOpacity: number;
     /** A CSS font stack built from the ghostty `font-family` lines; null = host default. */
@@ -466,6 +474,7 @@ export const DEFAULT_WS_SETTINGS: WsSettingsSnapshot = {
     },
     appearance: {
         backgroundColor: DEFAULT_SETTINGS_BACKGROUND,
+        backgroundConfigured: false,
         backgroundOpacity: 1,
         fontFamily: null,
         fontSize: null,

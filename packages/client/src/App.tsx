@@ -20,6 +20,7 @@ import { boundKeymap, buildKeymap, nativeChordOwners } from './chrome/keymap';
 import { useInteractionSurface } from './interaction/use-interaction';
 import { createBackendPromptBridge } from './interaction/backend-prompts';
 import { pluginRequest } from './plugins/client';
+import { PluginStylesProvider, PluginWindowStyles, usePluginStyleSet, usePluginStyles } from './plugins/styles';
 import { createUIServiceAdapter } from './plugins/ui-services';
 import { PluginContributionItems } from './plugins/contributions-ui';
 import { usePaneHeaderContributions } from './plugins/contributions';
@@ -152,6 +153,7 @@ import {
     createKeyDispatcher,
     flattenOver,
     hoverFill,
+    isDarkBackground,
     isSidebarMounted,
     normalizeHexColor,
     presetChromeTheme,
@@ -365,10 +367,18 @@ export function App(props: AppProps): ReactElement {
         [appearance.backgroundColor, appearance.backgroundOpacity]
     );
     const chromeSettings = settings.value.chrome;
+    /*
+     * Theme plugins (`plugins/styles.tsx`), from this window's own daemon. A theme's
+     * `--kelpi-term-bg` paints terminals whose background nobody chose, so in that case the
+     * variable is left to it here rather than pinned to the default; `Shell` does the same for
+     * the colours it hands the panes.
+     */
+    const pluginStyles = usePluginStyles(props.runtime);
+    const themedTerminalBackground = pluginStyles.window.length > 0 && appearance.backgroundConfigured === false;
     const style = useMemo(() => {
         if (!settings.loaded) return undefined;
         return {
-            '--kelpi-term-bg': paneFill,
+            ...(themedTerminalBackground ? {} : { '--kelpi-term-bg': paneFill }),
             /*
              * §APP-014: the resolved `theme = <name>` palette, as the terminal tokens.
              *
@@ -396,7 +406,7 @@ export function App(props: AppProps): ReactElement {
                 presetChromeTheme(appearance.isDark ? 'dark' : 'light')
             )
         } as CSSProperties;
-    }, [settings.loaded, paneFill, chromeSettings, appearance.isDark, appearance.terminalTheme]);
+    }, [settings.loaded, paneFill, chromeSettings, appearance.isDark, appearance.terminalTheme, themedTerminalBackground]);
     /**
      * SET-031: the chrome's light/dark is now a **user preference** (`chrome-appearance`), not
      * a derivation. `'system'` — the shipped default — keeps exactly the behaviour this client
@@ -431,7 +441,10 @@ export function App(props: AppProps): ReactElement {
             className="contents"
             {...(style !== undefined ? { style } : {})}
         >
-            <Shell {...props} />
+            <PluginWindowStyles styles={pluginStyles.window} />
+            <PluginStylesProvider value={pluginStyles}>
+                <Shell {...props} />
+            </PluginStylesProvider>
         </ThemeProvider>
     );
 }
@@ -2839,11 +2852,30 @@ function Shell(props: AppProps): ReactElement {
      * what libghostty's `ghostty_app_update_config` did for the Swift app.
      */
     const themePalette = settings.appearance.terminalTheme.palette;
+    /*
+     * Theme plugins add a fourth: their `--kelpi-term-*` on `:root` is what the DOM answer reads,
+     * so a theme's sheets arriving or leaving re-runs this effect too. They are injected in a
+     * layout effect (`PluginWindowStyles`), so this read sees them.
+     */
+    const pluginStyles = usePluginStyleSet();
     useEffect(() => {
         setTerminalTheme(
             mergeTerminalPalette(resolveTerminalTheme(null, terminalThemePreset(bucket)), themePalette)
         );
-    }, [bucket, themePalette]);
+    }, [bucket, themePalette, pluginStyles.window]);
+    /*
+     * A theme plugin's `--kelpi-term-bg` paints terminals whose background nobody chose: no
+     * `background` line, no theme that supplies one (`backgroundConfigured`). A chosen one still
+     * wins, and without a theme plugin nothing here changes. Content panes then read in the
+     * light/dark of the background actually painted; otherwise each keeps its render's own
+     * verdict, which is the right one for a remote daemon's documents too.
+     */
+    const themedBackground =
+        pluginStyles.window.length > 0 && settings.appearance.backgroundConfigured === false
+            ? normalizeHexColor(terminalTheme?.background ?? '')
+            : null;
+    const terminalBackground = themedBackground ?? settings.appearance.backgroundColor;
+    const panesDark = themedBackground === null ? undefined : isDarkBackground(themedBackground);
 
     // The ghostty background overrides whatever the chrome palette says, and it must stay an
     // opaque hex: ghostty-web's parser maps `rgba()` (and every other non-hex form) to BLACK.
@@ -2857,10 +2889,10 @@ function Shell(props: AppProps): ReactElement {
     // `background-opacity` inside the surface; no engine here exposes that, and handing
     // ghostty-web an `rgba()` would paint every terminal black.
     const paneTheme = useMemo<TerminalTheme | undefined>(() => {
-        const background = normalizeHexColor(settings.appearance.backgroundColor);
+        const background = normalizeHexColor(terminalBackground);
         if (background === null) return terminalTheme;
         return { ...(terminalTheme ?? {}), background };
-    }, [terminalTheme, settings.appearance.backgroundColor]);
+    }, [terminalTheme, terminalBackground]);
 
     /**
      * §N17 — is `paneFill` actually translucent? Then the engine canvas must let it through.
@@ -2878,8 +2910,8 @@ function Shell(props: AppProps): ReactElement {
     const paneTransparency = settings.appearance.backgroundOpacity < 1;
 
     const paneFill = useMemo(
-        () => withAlpha(settings.appearance.backgroundColor, settings.appearance.backgroundOpacity),
-        [settings.appearance.backgroundColor, settings.appearance.backgroundOpacity]
+        () => withAlpha(terminalBackground, settings.appearance.backgroundOpacity),
+        [terminalBackground, settings.appearance.backgroundOpacity]
     );
 
     /**
@@ -2897,11 +2929,11 @@ function Shell(props: AppProps): ReactElement {
     const contentDocumentFill = useMemo(
         () =>
             flattenOver(
-                settings.appearance.backgroundColor,
+                terminalBackground,
                 settings.appearance.backgroundOpacity,
                 chromeTheme.windowBackground
             ),
-        [settings.appearance.backgroundColor, settings.appearance.backgroundOpacity, chromeTheme.windowBackground]
+        [terminalBackground, settings.appearance.backgroundOpacity, chromeTheme.windowBackground]
     );
 
     /**
@@ -4568,7 +4600,7 @@ function Shell(props: AppProps): ReactElement {
                 runtime={runtime} workspaceID={workspace?.id ?? ''} kind={pane.type}
                 paneID={paneID} content={content} csv={csv} editing={pane.isEditing} phone={phoneActive}
                 filePath={pane.filePath} wrap={pane.scratchpadWrap} focused={focused} visible={renderState.visible}
-                background={paneFill} documentBackground={contentDocumentFill} onFocusRequest={onTerminalFocus}
+                background={paneFill} documentBackground={contentDocumentFill} isDark={panesDark} onFocusRequest={onTerminalFocus}
                 onToggleEdit={act.toggleMarkdownEdit} findToken={findRequest?.paneID === paneID ? findRequest.seq : 0}
                 copyToken={copyRequest?.paneID === paneID ? copyRequest.seq : 0} findPalette={findPalette}
                 claimedChords={allViewChords} onOpenExternalEditor={act.openExternalEditor} /> : null;

@@ -31,6 +31,8 @@ export interface ScratchpadPaneProps {
     readonly visible?: boolean | undefined;
     /** The pane container's fill (may carry the ghostty opacity). */
     readonly background?: string | undefined;
+    /** The window's light/dark for this pane, over the render's own (`MarkdownPaneProps.isDark`). */
+    readonly isDark?: boolean | undefined;
     readonly onFocusRequest?: ((paneID: string) => void) | undefined;
     readonly scrollStore?: ScrollStore | undefined;
     /** Bump to open the editor's find bar (the app's `toggle_search` binding, §4.4). */
@@ -83,7 +85,7 @@ export function ScratchpadPane(props: ScratchpadPaneProps): ReactElement {
             // four-character id — never the raw UUID a screen reader would spell out in full.
             ariaLabel={contentPaneLabel('scratchpad', paneID)}
             value={state.text ?? ''}
-            isDark={state.isDark}
+            isDark={props.isDark ?? state.isDark}
             focused={props.focused}
             visible={props.visible}
             background={props.background}
