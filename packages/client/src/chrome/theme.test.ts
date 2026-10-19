@@ -93,7 +93,7 @@ describe('CSS custom properties', () => {
         const vars = chromeThemeCssVars(presetChromeTheme('dark'));
         expect(vars['--kelpi-bg']).toBe(DARK_CHROME_THEME.windowBackground);
         expect(vars['--kelpi-fg']).toBe(DARK_CHROME_THEME.textPrimary);
-        expect(vars['--kelpi-group-band-opacity']).toBe('0.22');
+        expect(vars['--kelpi-group-band-opacity']).toBe(String(DARK_CHROME_THEME.groupBandOpacity));
         expect(vars['--kelpi-surface-bg']).toBe(vars['--kelpi-surface']);
         expect(vars['--kelpi-agent']).toBe(vars['--kelpi-active-agent']);
     });

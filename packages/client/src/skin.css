@@ -1,0 +1,372 @@
+/**
+ * The Claude-desktop skin: the window's SHAPE, on top of the palette in `styles.css`.
+ *
+ * The palette alone does not get there. What makes the Claude app read as calm is structure:
+ * one warm ground under all the chrome, content on rounded cards that float on it, soft rings
+ * instead of hard rules, generous padding, and controls that wait for the pointer before they
+ * appear. This file is that structure, and nothing else.
+ *
+ * It is written as overrides keyed on the `data-testid` / `data-*` hooks the components already
+ * expose (the same hooks the tests and the UI audit drive), so no component had to change its
+ * markup for it, and an upstream change to a component merges without touching this file.
+ * `!important` is used only where a component paints the property inline, which is the one way
+ * a stylesheet can win against an inline style.
+ *
+ * Desktop only where it changes geometry: the phone layout has no room for gutters, and has no
+ * hover to reveal anything with.
+ */
+
+/* ── one ground ───────────────────────────────────────────────────────────────────────── */
+
+/* Title bar, sidebar and status bar share `--kelpi-bg`; the rules between them only cut it up. */
+[data-testid='top-bar'] {
+  border-bottom-color: transparent !important;
+}
+
+[data-testid='status-footer'] {
+  border-top-color: transparent !important;
+}
+
+[data-testid='sidebar'] > div:has([data-testid='sidebar-new-workspace']) {
+  border-top-color: transparent !important;
+}
+
+/* The sidebar's edge shows itself only where it can be grabbed. */
+[data-testid='sidebar-resizer'] > div {
+  background: transparent !important;
+  transition: background 120ms ease-out;
+}
+
+[data-testid='sidebar-resizer']:hover > div {
+  background: var(--kelpi-border) !important;
+}
+
+/* ── panes are cards ──────────────────────────────────────────────────────────────────── */
+
+/*
+ * Gutters without touching the layout maths. `PaneGrid` measures its own box minus its border,
+ * and every pane measures its own body, so a transparent border on the grid insets the whole
+ * layout from the window edges, and a transparent border on each pane turns the 2 px divider
+ * between two rects into a 10 px gap between two cards. The terminal's cols and rows come from
+ * the smaller box, exactly as they do for a divider drag.
+ */
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] {
+  border-style: solid;
+  border-color: transparent;
+  border-width: 2px 6px 6px 2px;
+}
+
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] > [data-pane-id] {
+  border: 4px solid transparent;
+  /* 10 px on the card itself: the pane clips its contents to the inside of this border. */
+  border-radius: 14px;
+  background-clip: padding-box;
+  transition: border-color 160ms ease-out;
+}
+
+/* A hairline edge, drawn over the contents so a terminal cannot paint across it. */
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] > [data-pane-id]::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--kelpi-fg) 9%, transparent);
+  pointer-events: none;
+}
+
+/*
+ * Focus is a fine accent line plus a soft halo in the gutter, not a 2 px frame. The halo is the
+ * pane's own transparent border tinted, so it follows the card's corners for free, and it fades
+ * with the ring when the keyboard is elsewhere (the ring's `data-dimmed`, issue #174).
+ */
+:root:not([data-form-factor='phone']) [data-testid='focus-ring'] {
+  border-width: 1px !important;
+  border-radius: 10px !important;
+  border-color: color-mix(in srgb, var(--kelpi-pane-focus) 70%, transparent) !important;
+}
+
+:root:not([data-form-factor='phone']) [data-testid='pane-grid'] > [data-focused='true'] {
+  border-color: color-mix(in srgb, var(--kelpi-pane-focus) 12%, transparent);
+}
+
+:root:not([data-form-factor='phone'])
+  [data-testid='pane-grid']
+  > [data-focused='true']:has(> [data-testid='focus-ring'][data-dimmed='true']) {
+  border-color: color-mix(in srgb, var(--kelpi-pane-focus) 5%, transparent);
+}
+
+/* The 2 px bar between panes is a grab handle, so it appears under the pointer and nowhere else. */
+[data-testid^='divider-'][role='separator'] > div {
+  background: transparent !important;
+  border-radius: 2px;
+  transition: background 120ms ease-out;
+}
+
+[data-testid^='divider-'][role='separator']:hover > div,
+[data-testid^='divider-'][role='separator'][data-dragging='true'] > div {
+  background: color-mix(in srgb, var(--kelpi-accent) 60%, transparent) !important;
+}
+
+/* ── pane header ──────────────────────────────────────────────────────────────────────── */
+
+/* Same colour as the body below it, so no rule between them: the header is the card's top. */
+[data-pane-id] > [data-testid^='pane-header-'] {
+  box-shadow: none !important;
+  gap: 6px !important;
+  padding-left: 12px !important;
+  padding-right: 8px !important;
+}
+
+/* The pane's name is its title: plain type, not a tinted chip with a tag glyph. */
+[data-testid^='pane-label-'] {
+  background: transparent !important;
+  color: var(--kelpi-fg) !important;
+  font-family: var(--kelpi-font-ui) !important;
+  font-size: 12px !important;
+  font-weight: 600;
+  padding-left: 0 !important;
+}
+
+[data-testid^='pane-label-'] > svg {
+  display: none;
+}
+
+[data-testid^='pane-title-'] {
+  color: var(--kelpi-fg-secondary) !important;
+}
+
+[data-testid^='pane-status-dot-'] {
+  width: 8px !important;
+  height: 8px !important;
+}
+
+[data-testid^='pane-branch-'] {
+  border-radius: 6px !important;
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+  color: var(--kelpi-fg-tertiary) !important;
+  background: color-mix(in srgb, var(--kelpi-fg) 6%, transparent) !important;
+}
+
+/* Split, web and close wait for the pointer. A keyboard focus still shows them. */
+:root:not([data-form-factor='phone']) [data-testid^='pane-header-'] button {
+  opacity: 0 !important;
+  border-radius: 6px !important;
+  transition:
+    opacity 120ms ease-out,
+    background 120ms ease-out;
+}
+
+:root:not([data-form-factor='phone']) [data-pane-id]:hover [data-testid^='pane-header-'] button,
+:root:not([data-form-factor='phone']) [data-testid^='pane-header-'] button:focus-visible {
+  opacity: 0.7 !important;
+}
+
+:root:not([data-form-factor='phone']) [data-testid^='pane-header-'] button:hover {
+  opacity: 1 !important;
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+/* ── sidebar ──────────────────────────────────────────────────────────────────────────── */
+
+[data-testid='sidebar'] div:has(> input[data-testid='sidebar-filter']) {
+  border-color: transparent !important;
+  border-radius: 9px !important;
+  background: color-mix(in srgb, var(--kelpi-fg) 5%, transparent) !important;
+  padding-top: 7px !important;
+  padding-bottom: 7px !important;
+  transition: box-shadow 120ms ease-out;
+}
+
+[data-testid='sidebar'] div:has(> input[data-testid='sidebar-filter']):focus-within {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--kelpi-accent) 55%, transparent);
+}
+
+[data-testid='workspace-row'] {
+  border-radius: 8px !important;
+}
+
+/* The current workspace is a soft fill, not an accent outline. */
+[data-testid='workspace-row'][data-active='true'] {
+  outline: none !important;
+  background-color: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+[data-testid='workspace-row']:not([data-active='true']):not([data-selected='true']):hover {
+  background-color: color-mix(in srgb, var(--kelpi-fg) 4%, transparent) !important;
+}
+
+[data-testid='workspace-row'] .font-semibold {
+  font-weight: 500;
+}
+
+[data-testid='workspace-row'][data-active='true'] .font-semibold {
+  font-weight: 600;
+}
+
+[data-testid='group-header'] {
+  border-color: transparent !important;
+}
+
+/* ⌘1…⌘9 are there when you look for them: on the row under the pointer. */
+:root:not([data-form-factor='phone']) [data-testid='cmd-badge'] {
+  opacity: 0;
+  transition: opacity 120ms ease-out;
+}
+
+:root:not([data-form-factor='phone']) [data-testid='workspace-row']:hover [data-testid='cmd-badge'] {
+  opacity: 1;
+}
+
+/* New Workspace in the Claude app's "New chat" dress: the plus in an accent disc. */
+[data-testid='sidebar-new-workspace'] {
+  color: var(--kelpi-fg) !important;
+  font-weight: 500;
+  gap: 9px !important;
+}
+
+[data-testid='sidebar-new-workspace'] > svg {
+  box-sizing: content-box;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--kelpi-accent);
+  color: #fff;
+}
+
+/* ── title bar and status bar ─────────────────────────────────────────────────────────── */
+
+/* The workspace name is the window's title, set in the serif the Claude app uses for its own. */
+[data-testid='top-bar-identity'] > .font-semibold {
+  font-family: var(--kelpi-font-serif);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+[data-testid='layout-cycle'],
+[data-testid='connection-pill'] {
+  background: transparent !important;
+}
+
+[data-testid='layout-cycle']:hover,
+[data-testid='sync-toggle']:hover {
+  background: color-mix(in srgb, var(--kelpi-fg) 6%, transparent) !important;
+}
+
+[data-testid='status-footer'] {
+  color: var(--kelpi-fg-tertiary) !important;
+}
+
+/* ── surfaces: menus, palette, sheets, toasts ─────────────────────────────────────────── */
+
+:root {
+  --kelpi-skin-shadow: 0 16px 40px rgba(0, 0, 0, 0.36), 0 2px 8px rgba(0, 0, 0, 0.2);
+  --kelpi-skin-edge: color-mix(in srgb, var(--kelpi-fg) 10%, transparent);
+}
+
+:root[data-kelpi-theme='light'] {
+  --kelpi-skin-shadow: 0 16px 40px rgba(31, 30, 29, 0.12), 0 2px 8px rgba(31, 30, 29, 0.08);
+}
+
+:root:not([data-form-factor='phone']) [role='dialog'][class*='rounded'] {
+  border-radius: 12px !important;
+}
+
+[data-testid='context-menu'] {
+  border-radius: 12px !important;
+  padding: 5px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+[data-testid='context-menu'] [role='menuitem'],
+[data-testid='context-menu'] [role='menuitemcheckbox'] {
+  border-radius: 7px !important;
+  padding-top: 5px !important;
+  padding-bottom: 5px !important;
+  font-size: 13px !important;
+}
+
+/* A neutral highlight, as in the Claude app's menus, rather than an accent wash. */
+[data-testid='context-menu'] [data-highlighted='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+[data-testid='command-palette'] {
+  border-radius: 14px !important;
+  border: 1px solid var(--kelpi-skin-edge);
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+[data-testid='command-palette'] > div:first-child {
+  border-bottom-color: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+  padding: 12px 16px !important;
+}
+
+[data-testid='command-palette'] > div:nth-child(2) {
+  padding: 6px !important;
+}
+
+[data-testid='palette-row'] {
+  border-radius: 8px;
+}
+
+[data-testid='palette-row'][data-selected='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+}
+
+[data-testid='settings-window'] {
+  border-radius: 16px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+[data-testid='settings-toolbar'],
+[data-testid='settings-window'] > div:has(> label > [data-testid='settings-search']),
+[data-testid='settings-tabs'] {
+  background: transparent !important;
+  border-color: color-mix(in srgb, var(--kelpi-fg) 7%, transparent) !important;
+}
+
+[data-testid='settings-toolbar'] {
+  padding: 10px 14px !important;
+}
+
+[data-testid='settings-toolbar'] > .font-semibold,
+[data-testid='settings-panel'] h3 {
+  font-family: var(--kelpi-font-serif);
+  font-weight: 500;
+}
+
+[data-testid='settings-toolbar'] > .font-semibold {
+  font-size: 15px;
+}
+
+[data-testid='settings-panel'] h3 {
+  font-size: 16px;
+}
+
+[data-testid='settings-tabs'] [role='tab'] {
+  border-radius: 8px !important;
+  padding: 6px 10px !important;
+  font-size: 13px !important;
+}
+
+[data-testid='settings-tabs'] [role='tab'][aria-selected='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent) !important;
+  color: var(--kelpi-fg) !important;
+}
+
+[data-testid='settings-search'] {
+  border-radius: 8px !important;
+}
+
+[data-settings-card='true'] {
+  border-radius: 10px !important;
+}
+
+[data-testid='toast-stack'] > * {
+  border-radius: 12px !important;
+  padding: 10px 14px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+  box-shadow: var(--kelpi-skin-shadow) !important;
+}

@@ -542,6 +542,14 @@ export function prepareContentDocument(html: string, options: PrepareDocumentOpt
     // a guessed <head> could put the policy after an attacker-provided executable element.
     const parsed = new DOMParser().parseFromString(document, 'text/html');
     for (const meta of parsed.querySelectorAll('meta[http-equiv]')) meta.remove();
+    // The daemon picks `<html class="dark|light">` from ITS background, but an unconfigured
+    // background follows the window (`MarkdownPaneProps.isDark`), and the daemon's stylesheet
+    // carries both halves, so the frame's scheme decides which one applies.
+    const rootClasses = parsed.documentElement.classList;
+    if (options.colorScheme !== undefined && (rootClasses.contains('dark') || rootClasses.contains('light'))) {
+        rootClasses.remove('dark', 'light');
+        rootClasses.add(options.colorScheme);
+    }
     const source = `\n${contentBridgeScript(options.paneID, options.findPalette, options.claimedChords)}\n`;
     const digest = sha256(new TextEncoder().encode(source));
     const hash = btoa(String.fromCharCode(...digest));

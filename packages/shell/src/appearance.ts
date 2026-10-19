@@ -124,8 +124,8 @@ export function transparencyNeedsRelaunch(createdTransparent: boolean, opacity: 
  * stated reason: the main process does not (and must not) load the renderer bundle. If the
  * preset table changes, both copies change with it — which is why each is named after its key.
  */
-export const LIGHT_WINDOW_GROUND = '#EAE8E2';
-export const DARK_WINDOW_GROUND = '#0A0A0C';
+export const LIGHT_WINDOW_GROUND = '#F0EEE6';
+export const DARK_WINDOW_GROUND = '#1F1E1D';
 
 /**
  * What the window paints where nothing else has (§N31).

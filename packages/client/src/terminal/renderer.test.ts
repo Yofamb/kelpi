@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { DARK_CHROME_THEME, LIGHT_CHROME_THEME } from '../chrome/theme';
 import { REPLAY_CHUNK_BYTES, createTerminalIngest } from './ingest';
 import {
     DEFAULT_FONT_FAMILY,
@@ -263,12 +264,16 @@ describe('terminal palette presets (run-B L4)', () => {
         expect(LIGHT_TERMINAL_THEME.foreground).not.toBe(DEFAULT_TERMINAL_THEME.foreground);
     });
 
-    it('defaults the terminal foreground to ghostty’s own white, not the chrome grey', () => {
-        // ghostty `src/config/Config.zig`: background #282c34, foreground #ffffff. The pane
-        // header beside it paints chrome `textPrimary` (#E6E6EA); a terminal body dimmer than
-        // its own header is the defect.
-        expect(DEFAULT_TERMINAL_THEME.foreground).toBe('#FFFFFF');
-        expect(DEFAULT_TERMINAL_THEME.cursor).toBe('#FFFFFF');
+    it('defaults the terminal foreground to the header’s own ink, never a dimmer grey', () => {
+        // The pane header paints chrome `textPrimary` on `headerBackground`; a terminal body
+        // dimmer than its own header is the defect. Same ink on the same ground, in both buckets,
+        // and the cursor is the accent.
+        expect(DEFAULT_TERMINAL_THEME.foreground).toBe(DARK_CHROME_THEME.textPrimary);
+        expect(DEFAULT_TERMINAL_THEME.background).toBe(DARK_CHROME_THEME.headerBackground);
+        expect(DEFAULT_TERMINAL_THEME.cursor).toBe(DARK_CHROME_THEME.accent);
+        expect(LIGHT_TERMINAL_THEME.foreground).toBe(LIGHT_CHROME_THEME.textPrimary);
+        expect(LIGHT_TERMINAL_THEME.background).toBe(LIGHT_CHROME_THEME.headerBackground);
+        expect(LIGHT_TERMINAL_THEME.cursor).toBe(LIGHT_CHROME_THEME.accent);
     });
 
     it('falls back to the base the caller passes, not always to dark', () => {

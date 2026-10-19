@@ -115,11 +115,12 @@ export const RESIZE_MAX_WAIT_MS = 100;
  * padding writes that key; the `paddingX` prop carries the configured value here).
  *
  * Two jobs: it keeps the focus ring off the first and last columns (see the pane root's style),
- * and it gives the grid breathing room from the pane edge — 4, a step roomier than ghostty's
- * own `window-padding-x = 2` default, chosen deliberately. Applied to the pane root, NOT to
- * the host the geometry is measured from, so cols stay honest.
+ * and it gives the grid breathing room from the pane edge — 10, well clear of the pane card's
+ * rounded corners (`skin.css`) and roomier than ghostty's own `window-padding-x = 2` default,
+ * chosen deliberately. Applied to the pane root, NOT to the host the geometry is measured from,
+ * so cols stay honest.
  */
-export const TERMINAL_EDGE_PADDING = 4;
+export const TERMINAL_EDGE_PADDING = 10;
 
 /**
  * Vertical breathing room between the pane's top edge and row 1, in CSS pixels — the DEFAULT
@@ -127,13 +128,13 @@ export const TERMINAL_EDGE_PADDING = 4;
  * {@link TERMINAL_EDGE_PADDING}.
  *
  * Same two jobs, rotated 90°: it keeps the first row's ascenders off the pane edge (and out
- * from under the focus ring) — 4, matching {@link TERMINAL_EDGE_PADDING} rather than the top
+ * from under the focus ring) — 10, matching {@link TERMINAL_EDGE_PADDING} rather than the top
  * half of ghostty's `window-padding-y = 2` default. Top only — the bottom edge already
  * collects the sub-cell remainder of `floor(height / cellHeight)`, so padding there would
  * double up. Applied to the pane root, NOT to the host the geometry is measured from, so rows
  * stay honest and the bottom row is never clipped.
  */
-export const TERMINAL_EDGE_PADDING_TOP = 4;
+export const TERMINAL_EDGE_PADDING_TOP = 10;
 
 /**
  * How many times a pane will build an engine before it gives up and shows the placeholder
@@ -2795,7 +2796,7 @@ function TerminalPaneImpl(props: TerminalPaneProps): ReactElement {
         restartRef.current?.();
     }, []);
 
-    const background = props.background ?? theme?.background ?? 'var(--kelpi-term-bg, #0A0A0C)';
+    const background = props.background ?? theme?.background ?? 'var(--kelpi-term-bg, #262624)';
 
 
     return (

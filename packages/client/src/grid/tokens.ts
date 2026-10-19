@@ -8,14 +8,14 @@
  */
 
 export const GRID_TOKEN_FALLBACKS = {
-    '--kelpi-bg': '#0A0A0C', // windowBackground: gaps between panes / empty grid
-    '--kelpi-header-bg': '#13131A', // headerBackground: pane headers, overlays
-    '--kelpi-surface-bg': '#101013', // surfaceBackground: chips, popovers
-    '--kelpi-fg': '#E6E6EA', // textPrimary
-    '--kelpi-fg-secondary': '#9A9AA0', // textSecondary
-    '--kelpi-fg-tertiary': '#6A6A72', // textTertiary
-    '--kelpi-border': '#24242B', // divider
-    '--kelpi-accent': '#6F9BD8', // accent
+    '--kelpi-bg': '#1F1E1D', // windowBackground: gaps between panes / empty grid
+    '--kelpi-header-bg': '#262624', // headerBackground: pane headers, overlays
+    '--kelpi-surface-bg': '#2C2B28', // surfaceBackground: chips, popovers
+    '--kelpi-fg': '#F0EEE6', // textPrimary
+    '--kelpi-fg-secondary': '#B4B1A7', // textSecondary
+    '--kelpi-fg-tertiary': '#85837B', // textTertiary
+    '--kelpi-border': '#3A3935', // divider
+    '--kelpi-accent': '#D97757', // accent
     /**
      * M13 — the macOS **system** accent, as its own name.
      *
@@ -32,12 +32,12 @@ export const GRID_TOKEN_FALLBACKS = {
      * name, it falls back to `--kelpi-accent` so today's palette is byte-identical, and whoever
      * threads the OS accent through later defines this one variable and all three follow.
      */
-    '--kelpi-system-accent': 'var(--kelpi-accent, #6F9BD8)', // systemAccent (M13)
-    '--kelpi-pane-focus': '#6F9BD8', // paneFocus (independently themable)
-    '--kelpi-status-running': '#5FBE89', // statusRunning
-    '--kelpi-status-waiting': '#6F9BD8', // statusWaiting
-    '--kelpi-status-inactive': '#8A8A92', // statusInactive
-    '--kelpi-agent': '#D3A329', // activeAgent (amber agent badge / elapsed timer)
+    '--kelpi-system-accent': 'var(--kelpi-accent, #D97757)', // systemAccent (M13)
+    '--kelpi-pane-focus': '#D97757', // paneFocus (independently themable)
+    '--kelpi-status-running': '#8CBF7F', // statusRunning
+    '--kelpi-status-waiting': '#D97757', // statusWaiting
+    '--kelpi-status-inactive': '#87857E', // statusInactive
+    '--kelpi-agent': '#D9A35B', // activeAgent (amber agent badge / elapsed timer)
     /**
      * L27 — the header's **one** orange.
      *
@@ -48,13 +48,13 @@ export const GRID_TOKEN_FALLBACKS = {
      * a `--kelpi-*` name, so it survived the light/dark swap unchanged) and SYNC repainted with
      * `--kelpi-agent`, which made a synced pane read as a pane with a running agent.
      *
-     * One name, both badges, and a light column so it actually swaps. The dark value is the
-     * port's existing ZOOM orange; the light one is derived from it by the same per-channel
-     * ratio that takes `--kelpi-agent` from `#d3a329` to `#a97c17`. Not repainted to SwiftUI's
-     * literal `Color.orange` (`#FF9F0A` dark / `#FF9500` light) — that is a palette decision the
-     * preset table owns, and this row is about the token, not the hue.
+     * One name, both badges, and a light column so it actually swaps. The values are the warm
+     * palette's orange, a step lighter and yellower than the clay accent so a zoomed pane never
+     * reads as a focused one. Not repainted to SwiftUI's literal `Color.orange` (`#FF9F0A` dark /
+     * `#FF9500` light) — that is a palette decision the preset table owns, and this row is about
+     * the token, not the hue.
      */
-    '--kelpi-orange': '#D08237'
+    '--kelpi-orange': '#E08A5E'
 } as const;
 
 export type GridTokenName = keyof typeof GRID_TOKEN_FALLBACKS;

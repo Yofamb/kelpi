@@ -70,12 +70,12 @@ describe('sandboxing', () => {
 
     it('falls back to the theme default when assembly resolved nothing', () => {
         const view = render(<ContentFrame paneID={PANE} title="markdown preview" html={BARE_DOCUMENT} />);
-        expect(srcdoc()).toContain('html{background-color:#0A0A0C;color-scheme:dark;}');
+        expect(srcdoc()).toContain('html{background-color:#262624;color-scheme:dark;}');
 
         view.rerender(
             <ContentFrame paneID={PANE} title="markdown preview" html={BARE_DOCUMENT} isDark={false} />
         );
-        expect(srcdoc()).toContain('html{background-color:#FFFFFF;color-scheme:light;}');
+        expect(srcdoc()).toContain('html{background-color:#FAF9F5;color-scheme:light;}');
     });
 
     it('loads the daemon’s document through srcdoc with the copy-button script injected', () => {

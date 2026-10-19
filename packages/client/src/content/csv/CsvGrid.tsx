@@ -1326,7 +1326,7 @@ export function CsvGrid(props: CsvGridProps): ReactElement {
             data-testid={`csv-grid-${paneID}`}
             data-csv-pane={paneID}
             className="relative flex h-full w-full flex-col"
-            style={{ background: props.background ?? 'var(--kelpi-term-bg, #0a0a0c)', color: tokens.textPrimary }}
+            style={{ background: props.background ?? 'var(--kelpi-term-bg, #262624)', color: tokens.textPrimary }}
         >
             <div
                 {...{ [PANE_SURFACE_ATTR]: '' }}

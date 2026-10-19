@@ -279,7 +279,7 @@ describe('S20 — the badge pill leaves the descender inside it', () => {
 describe('S30 — the header keeps all 24 px of its content band', () => {
     it('paints the divider with an inset shadow instead of a border', () => {
         const { header } = renderHeader(600);
-        expect(header.style.boxShadow).toBe('inset 0 -1px 0 var(--kelpi-border, #24242B)');
+        expect(header.style.boxShadow).toBe('inset 0 -1px 0 var(--kelpi-border, #3A3935)');
         expect(header.style.borderBottom).toBe('');
         expect(header.style.height).toBe('24px');
     });

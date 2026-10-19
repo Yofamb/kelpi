@@ -1755,13 +1755,13 @@ describe('row background states stack (§WS-027)', () => {
         );
         const row = rowFor(W1);
         // The 1.5px accent takes the outer edge …
-        expect(row.style.outline).toBe('1.5px solid var(--kelpi-selection-stroke, #5276B8)');
+        expect(row.style.outline).toBe('1.5px solid var(--kelpi-selection-stroke, #D97757)');
         // … and the selection's 1px stroke at 0.7 opacity survives as the inner ring. §H22: the
         // 0.7 now rides the LIVE `--kelpi-selection-stroke` (`WorkspaceRowView.swift:161` is
         // `theme.selectionStroke.opacity(0.7)`), where it used to be the dark preset's `#5276B8`
         // frozen into the source — a dark periwinkle on a light sidebar whose stroke is `#5e8ac4`.
         expect(row.style.boxShadow).toBe(
-            'inset 0 0 0 1px color-mix(in srgb, var(--kelpi-selection-stroke, #5276B8) 70%, transparent)'
+            'inset 0 0 0 1px color-mix(in srgb, var(--kelpi-selection-stroke, #D97757) 70%, transparent)'
         );
         // Both fills: the selection fill as the colour, the active tint layered over it. Read off
         // `backgroundColor` rather than the `background` shorthand, which is what the row now
@@ -1774,7 +1774,7 @@ describe('row background states stack (§WS-027)', () => {
         const { rerender } = render(
             <Sidebar {...baseProps()} entries={entries()} activeWorkspaceID={W1} />
         );
-        expect(rowFor(W1).style.outline).toBe('1.5px solid var(--kelpi-selection-stroke, #5276B8)');
+        expect(rowFor(W1).style.outline).toBe('1.5px solid var(--kelpi-selection-stroke, #D97757)');
         expect(rowFor(W1).style.boxShadow).toBe('');
         expect(rowFor(W1).style.backgroundImage).toBe('');
 
@@ -1787,7 +1787,7 @@ describe('row background states stack (§WS-027)', () => {
             />
         );
         expect(rowFor(W1).style.outline).toBe(
-            '1px solid color-mix(in srgb, var(--kelpi-selection-stroke, #5276B8) 70%, transparent)'
+            '1px solid color-mix(in srgb, var(--kelpi-selection-stroke, #D97757) 70%, transparent)'
         );
         expect(rowFor(W1).style.boxShadow).toBe('');
     });
@@ -1804,7 +1804,7 @@ describe('row background states stack (§WS-027)', () => {
      */
     it('§H6: the active fill is the neutral selection fill at 0.7, whatever colour the row is', () => {
         const expected =
-            'color-mix(in srgb, var(--kelpi-selection-fill, rgba(82, 118, 184, 0.24)) 70%, transparent)';
+            'color-mix(in srgb, var(--kelpi-selection-fill, rgba(217, 119, 87, 0.16)) 70%, transparent)';
         // Two rows of DIFFERENT colours, so a fill that read the workspace could not match twice.
         const coloured: ChromeSidebarEntry[] = [
             { kind: 'workspace', workspace: workspace(W1, 'alpha', { color: 'blue' }) },

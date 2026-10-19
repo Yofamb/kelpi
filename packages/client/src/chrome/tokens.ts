@@ -12,7 +12,7 @@
 
 /** Dark-column fallbacks (shell-ui.md §2 preset table). */
 export const CHROME_TOKEN_FALLBACKS = {
-    '--kelpi-bg': '#0A0A0C',
+    '--kelpi-bg': '#1F1E1D',
     /**
      * §N17 — the window GROUND, `theme.ts`'s `WINDOW_FILL_CSS_VAR`.
      *
@@ -21,24 +21,24 @@ export const CHROME_TOKEN_FALLBACKS = {
      * `background-opacity` 1 so each pane's own fill is the single translucent layer. Only two
      * elements may read it — `<body>` and the app root. Everything else keeps `--kelpi-bg`.
      */
-    '--kelpi-window-fill': '#0A0A0C',
-    '--kelpi-sidebar-bg': '#0C0C10',
-    '--kelpi-surface': '#101013',
-    '--kelpi-header-bg': '#13131A',
-    '--kelpi-footer-bg': '#0C0C10',
-    '--kelpi-fg': '#E6E6EA',
-    '--kelpi-fg-secondary': '#9A9AA0',
-    '--kelpi-fg-tertiary': '#6A6A72',
-    '--kelpi-border': '#24242B',
-    '--kelpi-selection-fill': 'rgba(82, 118, 184, 0.24)',
-    '--kelpi-selection-stroke': '#5276B8',
-    '--kelpi-accent': '#6F9BD8',
-    '--kelpi-pane-focus': '#6F9BD8',
-    '--kelpi-status-running': '#5FBE89',
-    '--kelpi-status-waiting': '#6F9BD8',
-    '--kelpi-status-inactive': '#8A8A92',
-    '--kelpi-active-agent': '#D3A329',
-    '--kelpi-group-band-opacity': '0.22'
+    '--kelpi-window-fill': '#1F1E1D',
+    '--kelpi-sidebar-bg': '#1F1E1D',
+    '--kelpi-surface': '#2C2B28',
+    '--kelpi-header-bg': '#262624',
+    '--kelpi-footer-bg': '#1F1E1D',
+    '--kelpi-fg': '#F0EEE6',
+    '--kelpi-fg-secondary': '#B4B1A7',
+    '--kelpi-fg-tertiary': '#85837B',
+    '--kelpi-border': '#3A3935',
+    '--kelpi-selection-fill': 'rgba(217, 119, 87, 0.16)',
+    '--kelpi-selection-stroke': '#D97757',
+    '--kelpi-accent': '#D97757',
+    '--kelpi-pane-focus': '#D97757',
+    '--kelpi-status-running': '#8CBF7F',
+    '--kelpi-status-waiting': '#D97757',
+    '--kelpi-status-inactive': '#87857E',
+    '--kelpi-active-agent': '#D9A35B',
+    '--kelpi-group-band-opacity': '0.16'
 } as const;
 
 export type ChromeTokenName = keyof typeof CHROME_TOKEN_FALLBACKS;

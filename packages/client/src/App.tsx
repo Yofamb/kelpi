@@ -404,12 +404,18 @@ export function App(props: AppProps): ReactElement {
      * terminals agree by construction (content-panes.md port note 9). Choosing Light or Dark
      * overrides that for the CHROME only; the terminal palette is untouched, which is the
      * independence §2 promises and SET-031 states outright.
+     *
+     * A background nobody configured has no luminance worth following (it is the shipped
+     * default), so under `'system'` the OS decides instead, as it does in the Claude app, and the
+     * terminals follow the window (`Shell`'s `terminalBackground`).
      */
+    const backgroundConfigured = appearance.backgroundConfigured !== false;
     const chromeAppearance = useMemo<ChromeAppearance>(() => {
         if (!settings.loaded) return 'system';
         if (chromeSettings.appearance !== 'system') return chromeSettings.appearance;
+        if (!backgroundConfigured) return 'system';
         return appearance.isDark ? 'dark' : 'light';
-    }, [settings.loaded, chromeSettings.appearance, appearance.isDark]);
+    }, [settings.loaded, chromeSettings.appearance, appearance.isDark, backgroundConfigured]);
 
     /**
      * APP-012 / SET-049 — the window fill follows the ghostty opacity, but ONLY inside a shell
@@ -2839,11 +2845,27 @@ function Shell(props: AppProps): ReactElement {
      * what libghostty's `ghostty_app_update_config` did for the Swift app.
      */
     const themePalette = settings.appearance.terminalTheme.palette;
+    /*
+     * Which background the panes paint, and so which half of the palette reads on it. A
+     * background the user chose (a `background` line or a theme) is used as-is and its luminance
+     * decides, as in the Swift app. One nobody chose follows the window instead: the chrome
+     * bucket's own terminal background, so a light window gets light terminals and markdown
+     * rather than a dark pane under a light palette. The palette follows the PANE's half, never
+     * the chrome's: the stylesheet's `--kelpi-term-*` tokens are the chrome bucket's, so they
+     * are read only when the two agree.
+     */
+    const backgroundConfigured = settings.appearance.backgroundConfigured !== false;
+    const terminalBackground = backgroundConfigured
+        ? settings.appearance.backgroundColor
+        : terminalThemePreset(bucket).background ?? settings.appearance.backgroundColor;
+    const panesDark = backgroundConfigured ? settings.appearance.isDark : bucket === 'dark';
     useEffect(() => {
+        const paneBucket = panesDark ? 'dark' : 'light';
+        const preset = terminalThemePreset(paneBucket);
         setTerminalTheme(
-            mergeTerminalPalette(resolveTerminalTheme(null, terminalThemePreset(bucket)), themePalette)
+            mergeTerminalPalette(paneBucket === bucket ? resolveTerminalTheme(null, preset) : preset, themePalette)
         );
-    }, [bucket, themePalette]);
+    }, [bucket, panesDark, themePalette]);
 
     // The ghostty background overrides whatever the chrome palette says, and it must stay an
     // opaque hex: ghostty-web's parser maps `rgba()` (and every other non-hex form) to BLACK.
@@ -2857,10 +2879,10 @@ function Shell(props: AppProps): ReactElement {
     // `background-opacity` inside the surface; no engine here exposes that, and handing
     // ghostty-web an `rgba()` would paint every terminal black.
     const paneTheme = useMemo<TerminalTheme | undefined>(() => {
-        const background = normalizeHexColor(settings.appearance.backgroundColor);
+        const background = normalizeHexColor(terminalBackground);
         if (background === null) return terminalTheme;
         return { ...(terminalTheme ?? {}), background };
-    }, [terminalTheme, settings.appearance.backgroundColor]);
+    }, [terminalTheme, terminalBackground]);
 
     /**
      * §N17 — is `paneFill` actually translucent? Then the engine canvas must let it through.
@@ -2878,8 +2900,8 @@ function Shell(props: AppProps): ReactElement {
     const paneTransparency = settings.appearance.backgroundOpacity < 1;
 
     const paneFill = useMemo(
-        () => withAlpha(settings.appearance.backgroundColor, settings.appearance.backgroundOpacity),
-        [settings.appearance.backgroundColor, settings.appearance.backgroundOpacity]
+        () => withAlpha(terminalBackground, settings.appearance.backgroundOpacity),
+        [terminalBackground, settings.appearance.backgroundOpacity]
     );
 
     /**
@@ -2897,11 +2919,11 @@ function Shell(props: AppProps): ReactElement {
     const contentDocumentFill = useMemo(
         () =>
             flattenOver(
-                settings.appearance.backgroundColor,
+                terminalBackground,
                 settings.appearance.backgroundOpacity,
                 chromeTheme.windowBackground
             ),
-        [settings.appearance.backgroundColor, settings.appearance.backgroundOpacity, chromeTheme.windowBackground]
+        [terminalBackground, settings.appearance.backgroundOpacity, chromeTheme.windowBackground]
     );
 
     /**
@@ -4568,7 +4590,7 @@ function Shell(props: AppProps): ReactElement {
                 runtime={runtime} workspaceID={workspace?.id ?? ''} kind={pane.type}
                 paneID={paneID} content={content} csv={csv} editing={pane.isEditing} phone={phoneActive}
                 filePath={pane.filePath} wrap={pane.scratchpadWrap} focused={focused} visible={renderState.visible}
-                background={paneFill} documentBackground={contentDocumentFill} onFocusRequest={onTerminalFocus}
+                background={paneFill} documentBackground={contentDocumentFill} isDark={panesDark} onFocusRequest={onTerminalFocus}
                 onToggleEdit={act.toggleMarkdownEdit} findToken={findRequest?.paneID === paneID ? findRequest.seq : 0}
                 copyToken={copyRequest?.paneID === paneID ? copyRequest.seq : 0} findPalette={findPalette}
                 claimedChords={allViewChords} onOpenExternalEditor={act.openExternalEditor} /> : null;
@@ -4841,8 +4863,10 @@ function Shell(props: AppProps): ReactElement {
                port's `RootChromeView` backdrop, and `RootChromeView.swift:32-39` paints that
                backdrop only while `background-opacity >= 1` ("an opaque backdrop here would
                defeat" a non-opaque window). Below 1 the token is `transparent`, so the desktop
-               reaches the pane fills instead of being multiplied away by stacked 0.85 grounds. */
-            style={{ background: chromeTokens.windowFill, color: chromeTokens.textPrimary }}
+               reaches the pane fills instead of being multiplied away by stacked 0.85 grounds.
+               `--kelpi-term-bg` is restated with the background the panes actually paint, which
+               the root provider cannot know before the chrome bucket resolves. */
+            style={{ background: chromeTokens.windowFill, color: chromeTokens.textPrimary, '--kelpi-term-bg': paneFill } as CSSProperties}
             onDragEnter={onDragEnter}
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}

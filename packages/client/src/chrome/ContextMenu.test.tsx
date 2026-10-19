@@ -424,7 +424,7 @@ describe('keyboard navigation — an NSMenu walk (M58)', () => {
  * vacuous. The real computed-colour read is the audit's, in a browser with the theme mounted.
  */
 describe('every enabled row highlights — hover, focus, or an open submenu', () => {
-    const HIGHLIGHT = 'var(--kelpi-selection-fill, rgba(82, 118, 184, 0.24))';
+    const HIGHLIGHT = 'var(--kelpi-selection-fill, rgba(217, 119, 87, 0.16))';
     const rows = [
         { id: 'rename', label: 'Rename…' },
         { id: 'status', label: 'Status', submenu: [{ id: 'idle', label: 'Idle' }] },

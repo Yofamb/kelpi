@@ -28,6 +28,18 @@ describe('prepareContentDocument', () => {
         expect(prepared.indexOf('<script>')).toBeLessThan(prepared.lastIndexOf('</body>'));
     });
 
+    it('sets the daemon’s light/dark class to the frame’s scheme, and leaves other documents alone', () => {
+        // An unconfigured background follows the window, which the daemon cannot see: it renders
+        // `class="dark"` against its default, and a light window must still get the light half.
+        const rendered = '<!DOCTYPE html>\n<html class="dark"><head></head><body><p>hi</p></body></html>\n';
+        expect(prepareContentDocument(rendered, { paneID: PANE, colorScheme: 'light' })).toContain('<html class="light">');
+        expect(prepareContentDocument(rendered, { paneID: PANE, colorScheme: 'dark' })).toContain('<html class="dark">');
+        expect(prepareContentDocument(rendered, { paneID: PANE })).toContain('<html class="dark">');
+
+        const plain = '<html class="article"><head></head><body></body></html>';
+        expect(prepareContentDocument(plain, { paneID: PANE, colorScheme: 'light' })).toContain('<html class="article">');
+    });
+
     it('is not fooled by a literal </body> inside the content', () => {
         const html = '<html><head></head><body><pre><code>&lt;/body&gt;</code></pre></body></html>';
         const prepared = prepareContentDocument(html, { paneID: PANE });

@@ -19,7 +19,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { App } from './App';
 import { createFakeSocketFactory, type FakeWebSocket } from './connection';
 import { createKelpiRuntime, createKelpiStore, type KelpiRuntime } from './state';
-import { DEFAULT_TERMINAL_THEME } from './terminal';
+import { DEFAULT_TERMINAL_THEME, LIGHT_TERMINAL_THEME } from './terminal';
 import { createFakeRendererFactory } from './terminal/testing';
 
 const W1 = 'AAAAAAAA-0000-4000-8000-000000000001';
@@ -57,6 +57,10 @@ interface ThemeInput {
     readonly error?: string | null;
     /** Omit `terminalTheme` entirely — an older daemon that has never heard of §APP-014. */
     readonly legacy?: boolean;
+    /** `appearance.backgroundConfigured`; omitted, the field is absent (an older daemon). */
+    readonly configured?: boolean;
+    /** `chrome.appearance`; omitted, no chrome settings are sent. */
+    readonly chromeAppearance?: 'system' | 'light' | 'dark';
 }
 
 function settingsPayload(input: ThemeInput = {}): Record<string, unknown> {
@@ -66,7 +70,8 @@ function settingsPayload(input: ThemeInput = {}): Record<string, unknown> {
         fontFamily: null,
         fontSize: null,
         isDark: input.isDark ?? true,
-        theme: input.name ?? null
+        theme: input.name ?? null,
+        ...(input.configured === undefined ? {} : { backgroundConfigured: input.configured })
     };
     if (input.legacy !== true) {
         appearance['terminalTheme'] = {
@@ -79,7 +84,8 @@ function settingsPayload(input: ThemeInput = {}): Record<string, unknown> {
     return {
         keybindLines: [],
         general: { focusFollowsMouse: false, focusFollowsMouseDelay: 100, theme: null },
-        appearance
+        appearance,
+        ...(input.chromeAppearance === undefined ? {} : { chrome: { appearance: input.chromeAppearance } })
     };
 }
 
@@ -201,5 +207,28 @@ describe('a resolved terminal theme reaches the panes', () => {
     it('is unbothered by a daemon that never sends the field at all', () => {
         const h = setup({ legacy: true });
         expect(appliedTheme(h)['foreground']).toBe(DEFAULT_TERMINAL_THEME.foreground);
+    });
+});
+
+describe('a background nobody chose follows the window', () => {
+    it('paints light terminals in a light window, not the dark default under a light palette', () => {
+        const h = setup({ configured: false, chromeAppearance: 'light' });
+        const theme = appliedTheme(h);
+        expect(theme['background']).toBe(LIGHT_TERMINAL_THEME.background);
+        expect(theme['foreground']).toBe(LIGHT_TERMINAL_THEME.foreground);
+    });
+
+    it('paints dark terminals in a dark window', () => {
+        const h = setup({ configured: false, chromeAppearance: 'dark' });
+        const theme = appliedTheme(h);
+        expect(theme['background']).toBe(DEFAULT_TERMINAL_THEME.background);
+        expect(theme['foreground']).toBe(DEFAULT_TERMINAL_THEME.foreground);
+    });
+
+    it('keeps a chosen dark background in a light window, with the half of the palette that reads on it', () => {
+        const h = setup({ configured: true, chromeAppearance: 'light' });
+        const theme = appliedTheme(h);
+        expect(String(theme['background']).toLowerCase()).toBe('#0a0a0c');
+        expect(theme['foreground']).toBe(DEFAULT_TERMINAL_THEME.foreground);
     });
 });

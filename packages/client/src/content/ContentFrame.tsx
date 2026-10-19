@@ -56,14 +56,14 @@ import { stripFrontMatter, writeRichText, type RichClipboardWriter } from './cop
 import { contentScrollStore, type ScrollStore } from './scroll';
 
 /** The pane fill behind the transparent document (`--kelpi-term-bg`, as terminal panes use). */
-export const CONTENT_PANE_BACKGROUND = 'var(--kelpi-term-bg, #0A0A0C)';
+export const CONTENT_PANE_BACKGROUND = 'var(--kelpi-term-bg, #262624)';
 
 /**
  * The opaque fill painted INSIDE the frame when assembly did not resolve one (`bridge.ts`'s
  * `frameBaseStyle` explains why the frame needs its own). These are the `--kelpi-term-bg` defaults
  * of the two chrome columns, so a standalone frame (a test, a storybook) is still theme-correct.
  */
-export const FRAME_DOCUMENT_BACKGROUND = { dark: '#0A0A0C', light: '#FFFFFF' } as const;
+export const FRAME_DOCUMENT_BACKGROUND = { dark: '#262624', light: '#FAF9F5' } as const;
 
 /**
  * Content overlays clear the document's 8 px scrollbar gutter (`::-webkit-scrollbar { width: 8px }`

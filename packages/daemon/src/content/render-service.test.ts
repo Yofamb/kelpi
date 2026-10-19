@@ -126,7 +126,7 @@ describe('selected providers in native content panes', () => {
         const markdown = await f.service.subscribe(MD, state => f.seen.push(state));
         expect(markdown.state).toMatchObject({ paneID: MD, workspaceID: W1, type: 'markdown', text: '# Original\n', html: '<h1>Custom markdown</h1>' });
         expect(f.call.mock.calls[0]).toEqual([
-            { service: CONTENT_RENDER_SERVICE, version: 1, method: 'render', args: { kind: 'markdown', source: '# Original\n', backgroundColor: '#0A0A0C', fontSize: 14, assetBase: `/pane-assets/${MD}/` } },
+            { service: CONTENT_RENDER_SERVICE, version: 1, method: 'render', args: { kind: 'markdown', source: '# Original\n', backgroundColor: '#262624', fontSize: 14, assetBase: `/pane-assets/${MD}/` } },
             { daemonID: 'test-daemon', workspaceID: W1, paneID: MD }, expect.any(AbortSignal)
         ]);
         expect(await f.service.state(DIFF)).toMatchObject({ type: 'diff', html: '<h1>Custom diff</h1>' });

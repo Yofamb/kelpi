@@ -27,6 +27,7 @@ import { createKelpiRuntime } from './state';
 import { configuredTerminalEngine, loadTerminalFonts } from './terminal';
 import { readShellWindowID } from './webpane/shell-window';
 import './styles.css';
+import './skin.css';
 
 // Start the bundled terminal font before anything renders. `@font-face` is lazy, and a pane
 // that measures its cell against the fallback face computes columns the engine cannot draw —

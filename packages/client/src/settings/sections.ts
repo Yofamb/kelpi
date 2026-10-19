@@ -381,7 +381,7 @@ export const settingsWholeLabel = (value: number): string => String(Math.round(v
  * number; restated here so this module stays free of React, exactly as `SETTINGS_DEFAULT_TCP_PORT`
  * restates `GeneralTab`'s.
  */
-export const SETTINGS_TERMINAL_PADDING_DEFAULT = 4;
+export const SETTINGS_TERMINAL_PADDING_DEFAULT = 10;
 
 /**
  * The terminal font size a ghostty config that says nothing falls back to (`AppearanceTab`'s 13).

@@ -374,11 +374,23 @@ describe('buildSettingsSnapshot with a theme resolver', () => {
         expect(snapshot.appearance.isDark).toBe(false);
     });
 
+    it('says whether anyone chose the background, so a client may replace an unchosen one', () => {
+        expect(buildSettingsSnapshot('', '').appearance.backgroundConfigured).toBe(false);
+        expect(buildSettingsSnapshot('', 'background = #102030\n').appearance.backgroundConfigured).toBe(true);
+        const themed = buildSettingsSnapshot('', 'theme = Nord\n', { resolveTheme: resolver({ background: '#2e3440' }) });
+        expect(themed.appearance.backgroundConfigured).toBe(true);
+        // A theme that resolves without a background, or not at all, chose nothing.
+        const paletteOnly = buildSettingsSnapshot('', 'theme = Nord\n', { resolveTheme: resolver({ red: '#bf616a' }) });
+        expect(paletteOnly.appearance.backgroundConfigured).toBe(false);
+        const missing = buildSettingsSnapshot('', 'theme = Made Up\n', { resolveTheme: resolver({}, 'no such theme') });
+        expect(missing.appearance.backgroundConfigured).toBe(false);
+    });
+
     it('keeps today’s behaviour, plus a note, when the name does not resolve', () => {
         const snapshot = buildSettingsSnapshot('', 'theme = Made Up\n', {
             resolveTheme: (name) => ({ name, path: null, palette: {}, error: 'no such theme' })
         });
-        expect(snapshot.appearance.backgroundColor).toBe('#0a0a0c');
+        expect(snapshot.appearance.backgroundColor).toBe('#262624');
         expect(snapshot.appearance.terminalTheme.error).toBe('no such theme');
         expect(snapshot.appearance.theme).toBe('Made Up');
     });
@@ -463,7 +475,7 @@ describe('createSettingsService (theme files on disk)', () => {
     it('falls back visibly when the configured theme is not installed', () => {
         const f = service({ ghostty: 'theme = Nord\n' });
         const snapshot = f.service.reload();
-        expect(snapshot.appearance.backgroundColor).toBe('#0a0a0c');
+        expect(snapshot.appearance.backgroundColor).toBe('#262624');
         expect(snapshot.appearance.terminalTheme.palette).toEqual({});
         expect(snapshot.appearance.terminalTheme.error).toContain('Nord');
     });

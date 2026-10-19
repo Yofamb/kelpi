@@ -57,7 +57,7 @@ describe('pane search overlay — LOW-POLISH', () => {
      */
     it('sets the field into the bar rather than punching it through', () => {
         const { input } = renderBar();
-        expect(input.style.background).toBe('color-mix(in srgb, var(--kelpi-fg, #E6E6EA) 8%, transparent)');
+        expect(input.style.background).toBe('color-mix(in srgb, var(--kelpi-fg, #F0EEE6) 8%, transparent)');
         expect(input.style.background).not.toContain('--kelpi-surface-bg');
         expect(input.style.borderRadius).toBe('5px');
         expect(input.style.paddingTop).toBe('5px');
@@ -216,7 +216,7 @@ describe('pane header — LOW-POLISH', () => {
         );
         const zoom = screen.getByTestId('pane-zoom-badge-a');
         const sync = screen.getByTestId('pane-sync-badge-a');
-        expect(zoom.style.color).toBe('var(--kelpi-orange, #D08237)');
+        expect(zoom.style.color).toBe('var(--kelpi-orange, #E08A5E)');
         expect(sync.style.color).toBe(zoom.style.color);
         // The hard-coded hex is gone, and so is the collision with `--kelpi-agent`.
         expect(zoom.getAttribute('style')).not.toContain('#D08237;');

@@ -760,8 +760,45 @@ pre.frontmatter-raw { padding: 8px 10px; border-left: 3px solid #d1d9e0; padding
 .code-copy-btn.copied::before {
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.751.751 0 0 1 .018-1.042.751.751 0 0 1 1.042-.018L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z'/%3E%3C/svg%3E");
 }
-`;
+${WARM_READING_STYLESHEET}`;
 }
+
+/**
+ * The Claude app's reading surface, laid over the GitHub-flavoured sheet above: prose and
+ * headings in a book serif, the warm neutrals of the client's default palette instead of
+ * GitHub's cool greys, and the clay accent for links, quotes and ticked tasks. Appended rather
+ * than edited in, so every rule above keeps its parity history and this block is the whole of
+ * the difference. Charter ships with macOS; Bitstream Charter is the same face on Linux.
+ */
+const WARM_READING_STYLESHEET = `body {
+    font-family: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
+    line-height: 1.65;
+    color: #1f1e1d;
+}
+.dark body { color: #e9e7df; }
+h1, h2, h3, h4, h5, h6 {
+    font-family: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
+    font-weight: 500;
+}
+h1, h2, hr { border-color: #e3e0d6; }
+.dark h1, .dark h2, .dark hr { border-color: #3a3935; }
+a { color: #b65738; }
+.dark a { color: #e0896b; }
+pre { background: #f0eee6; border-radius: 10px; }
+.dark pre { background: #1f1e1d; }
+:not(pre) > code { background: #ebe8df; }
+.dark :not(pre) > code { background: #34332f; }
+blockquote { border-left-color: #d97757; color: #6b6964; }
+.dark blockquote { border-left-color: #d97757; color: #a8a59b; }
+th, td, table.frontmatter, table.frontmatter th, table.frontmatter td { border-color: #e3e0d6; }
+th, table.frontmatter th { background: #f5f4ed; }
+.dark th, .dark td, .dark table.frontmatter, .dark table.frontmatter th, .dark table.frontmatter td { border-color: #3a3935; }
+.dark th, .dark table.frontmatter th { background: #2c2b28; }
+li.task-list-item > input.task-list-item-checkbox { border-color: #a8a59b; border-radius: 4px; }
+.dark li.task-list-item > input.task-list-item-checkbox { border-color: #85837b; }
+li.task-list-item > input.task-list-item-checkbox:checked { background-color: #c96442; border-color: #c96442; }
+.dark li.task-list-item > input.task-list-item-checkbox:checked { background-color: #d97757; border-color: #d97757; }
+`;
 
 export interface MarkdownRenderOptions extends ContentAppearance {
     /** `pane.markdownFontSize`; default 14. */

@@ -52,48 +52,56 @@ export type ChromeAppearance = 'system' | 'light' | 'dark';
 /** The concrete bucket an appearance resolves to; overrides are stored per bucket. */
 export type ChromeBucket = 'light' | 'dark';
 
+/*
+ * The default palette is the Claude desktop app's: warm neutrals instead of blue-black, and
+ * Claude's clay (`#D97757` dark, `#C96442` light) as the one accent. The window, sidebar, title
+ * bar and status bar share a single ground so the chrome reads as one surface, and pane headers
+ * match the terminal background so each pane reads as one card on it (`skin.css`). "Awaiting
+ * input" is the accent on purpose: it is the state that asks for you.
+ */
+
 /** §2 preset table, light column. */
 export const LIGHT_CHROME_THEME: ChromeTheme = {
-    windowBackground: '#EAE8E2',
-    sidebarBackground: '#EFEEE9',
+    windowBackground: '#F0EEE6',
+    sidebarBackground: '#F0EEE6',
     surfaceBackground: '#FFFFFF',
-    headerBackground: '#F7F6F2',
-    footerBackground: '#EFEEE9',
-    textPrimary: '#2B2B2E',
-    textSecondary: '#6B6C70',
-    textTertiary: '#9A9A96',
-    divider: '#DEDCD5',
-    selectionFill: 'rgba(94, 138, 196, 0.16)',
-    selectionStroke: '#5E8AC4',
-    accent: '#5E8AC4',
-    paneFocus: '#5E8AC4',
-    statusRunning: '#4FA46B',
-    statusWaiting: '#5E8AC4',
-    statusInactive: '#9A9A96',
-    activeAgent: '#A97C17',
-    groupBandOpacity: 0.3
+    headerBackground: '#FAF9F5',
+    footerBackground: '#F0EEE6',
+    textPrimary: '#1F1E1D',
+    textSecondary: '#5F5E59',
+    textTertiary: '#8F8D86',
+    divider: '#DDDBD2',
+    selectionFill: 'rgba(201, 100, 66, 0.12)',
+    selectionStroke: '#C96442',
+    accent: '#C96442',
+    paneFocus: '#C96442',
+    statusRunning: '#5B8F4E',
+    statusWaiting: '#C96442',
+    statusInactive: '#9C9A92',
+    activeAgent: '#A8732A',
+    groupBandOpacity: 0.22
 };
 
 /** §2 preset table, dark column. */
 export const DARK_CHROME_THEME: ChromeTheme = {
-    windowBackground: '#0A0A0C',
-    sidebarBackground: '#0C0C10',
-    surfaceBackground: '#101013',
-    headerBackground: '#13131A',
-    footerBackground: '#0C0C10',
-    textPrimary: '#E6E6EA',
-    textSecondary: '#9A9AA0',
-    textTertiary: '#6A6A72',
-    divider: '#24242B',
-    selectionFill: 'rgba(82, 118, 184, 0.24)',
-    selectionStroke: '#5276B8',
-    accent: '#6F9BD8',
-    paneFocus: '#6F9BD8',
-    statusRunning: '#5FBE89',
-    statusWaiting: '#6F9BD8',
-    statusInactive: '#8A8A92',
-    activeAgent: '#D3A329',
-    groupBandOpacity: 0.22
+    windowBackground: '#1F1E1D',
+    sidebarBackground: '#1F1E1D',
+    surfaceBackground: '#2C2B28',
+    headerBackground: '#262624',
+    footerBackground: '#1F1E1D',
+    textPrimary: '#F0EEE6',
+    textSecondary: '#B4B1A7',
+    textTertiary: '#85837B',
+    divider: '#3A3935',
+    selectionFill: 'rgba(217, 119, 87, 0.16)',
+    selectionStroke: '#D97757',
+    accent: '#D97757',
+    paneFocus: '#D97757',
+    statusRunning: '#8CBF7F',
+    statusWaiting: '#D97757',
+    statusInactive: '#87857E',
+    activeAgent: '#D9A35B',
+    groupBandOpacity: 0.16
 };
 
 export function presetChromeTheme(bucket: ChromeBucket): ChromeTheme {
@@ -393,18 +401,21 @@ export interface ElementStyleTarget {
  * The ten `WorkspaceColor` tokens as concrete hex per bucket. `black` and `white` are the
  * adaptive monochromes described in shell-ui.md §14: black = dark gray in light mode / mid
  * gray in dark, white = light gray / near-white — always visible against the chrome.
+ *
+ * The hues are the usual ten, softened and warmed a step so they sit on the warm neutrals of the
+ * default palette instead of glowing against them.
  */
 export const WORKSPACE_COLOR_HEX: Readonly<Record<WorkspaceColor, Readonly<Record<ChromeBucket, string>>>> = {
-    red: { light: '#D0453C', dark: '#F0655C' },
-    orange: { light: '#C87A1E', dark: '#E8994A' },
-    yellow: { light: '#B99413', dark: '#E0C245' },
-    green: { light: '#3F9457', dark: '#5FBE89' },
-    blue: { light: '#3D74C0', dark: '#6F9BD8' },
-    purple: { light: '#8158C8', dark: '#A98BE8' },
-    pink: { light: '#C4508E', dark: '#E683B4' },
-    gray: { light: '#8A8A8E', dark: '#9A9AA0' },
-    black: { light: '#3A3A3E', dark: '#7A7A82' },
-    white: { light: '#C8C8C4', dark: '#E6E6EA' }
+    red: { light: '#C2493F', dark: '#E5786D' },
+    orange: { light: '#B9652A', dark: '#E39B5F' },
+    yellow: { light: '#A27D16', dark: '#DDBB68' },
+    green: { light: '#4D8445', dark: '#93BC7F' },
+    blue: { light: '#3F70B0', dark: '#82A9D8' },
+    purple: { light: '#7A5AB5', dark: '#AF98DB' },
+    pink: { light: '#B4507F', dark: '#DC8FB6' },
+    gray: { light: '#87857E', dark: '#A3A097' },
+    black: { light: '#3A3935', dark: '#7C7A73' },
+    white: { light: '#C6C3B9', dark: '#E8E6DC' }
 };
 
 export function workspaceColorHex(color: WorkspaceColor | null | undefined, bucket: ChromeBucket): string {

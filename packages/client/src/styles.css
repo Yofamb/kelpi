@@ -53,64 +53,66 @@
   color-scheme: dark;
 
   /* chrome — shell-ui.md §2, dark column */
-  --kelpi-bg: #0a0a0c;
+  --kelpi-bg: #1f1e1d;
   /* §N17: the GROUND. Same value as `--kelpi-bg` until `ThemeProvider` learns the window was
      created transparent, at which point it becomes `transparent` — see `chrome/theme.ts`.
      Defined per bucket here so the frame before the provider stamps is never the dark hex on
      a light chrome. */
-  --kelpi-window-fill: #0a0a0c;
-  --kelpi-sidebar-bg: #0c0c10;
-  --kelpi-surface: #101013;
-  --kelpi-surface-bg: #101013; /* grid/tokens.ts spelling */
-  --kelpi-header-bg: #13131a;
-  --kelpi-footer-bg: #0c0c10;
-  --kelpi-fg: #e6e6ea;
-  --kelpi-fg-secondary: #9a9aa0;
-  --kelpi-fg-tertiary: #6a6a72;
-  --kelpi-border: #24242b;
-  --kelpi-selection-fill: rgba(82, 118, 184, 0.24);
-  --kelpi-selection-stroke: #5276b8;
-  --kelpi-accent: #6f9bd8;
-  --kelpi-pane-focus: #6f9bd8;
-  --kelpi-status-running: #5fbe89;
-  --kelpi-status-waiting: #6f9bd8;
-  --kelpi-status-inactive: #8a8a92;
-  --kelpi-active-agent: #d3a329;
-  --kelpi-agent: #d3a329; /* grid/tokens.ts spelling */
+  --kelpi-window-fill: #1f1e1d;
+  --kelpi-sidebar-bg: #1f1e1d;
+  --kelpi-surface: #2c2b28;
+  --kelpi-surface-bg: #2c2b28; /* grid/tokens.ts spelling */
+  --kelpi-header-bg: #262624;
+  --kelpi-footer-bg: #1f1e1d;
+  --kelpi-fg: #f0eee6;
+  --kelpi-fg-secondary: #b4b1a7;
+  --kelpi-fg-tertiary: #85837b;
+  --kelpi-border: #3a3935;
+  --kelpi-selection-fill: rgba(217, 119, 87, 0.16);
+  --kelpi-selection-stroke: #d97757;
+  --kelpi-accent: #d97757;
+  --kelpi-pane-focus: #d97757;
+  --kelpi-status-running: #8cbf7f;
+  --kelpi-status-waiting: #d97757;
+  --kelpi-status-inactive: #87857e;
+  --kelpi-active-agent: #d9a35b;
+  --kelpi-agent: #d9a35b; /* grid/tokens.ts spelling */
   /* L27 — the pane header's ZOOM and SYNC badges (`PaneHeaderView.swift:109,134`, both
      `.orange`). One name for both, so they cannot drift into two ambers again. */
-  --kelpi-orange: #d08237;
-  --kelpi-group-band-opacity: 0.22;
+  --kelpi-orange: #e08a5e;
+  --kelpi-group-band-opacity: 0.16;
 
   /* terminal — terminal/renderer.ts DEFAULT_TERMINAL_THEME.
      The foreground is ghostty's own default (#ffffff, src/config/Config.zig), not --kelpi-fg:
      the terminal body must not read dimmer than the pane header framing it (run-B L4). */
-  --kelpi-term-bg: #0a0a0c;
-  --kelpi-term-fg: #ffffff;
-  --kelpi-term-cursor: #ffffff;
-  --kelpi-term-cursor-accent: #0a0a0c;
-  --kelpi-term-selection-bg: #2a3550;
-  --kelpi-term-selection-fg: #e6e6ea;
-  --kelpi-term-black: #15151a;
-  --kelpi-term-red: #d9707a;
-  --kelpi-term-green: #5fbe89;
-  --kelpi-term-yellow: #d3a329;
-  --kelpi-term-blue: #6f9bd8;
-  --kelpi-term-magenta: #b18ad1;
-  --kelpi-term-cyan: #5fb3b3;
-  --kelpi-term-white: #c9c9d1;
-  --kelpi-term-bright-black: #4a4a55;
-  --kelpi-term-bright-red: #e88e96;
-  --kelpi-term-bright-green: #7fd4a3;
-  --kelpi-term-bright-yellow: #e5be55;
-  --kelpi-term-bright-blue: #8fb5e6;
-  --kelpi-term-bright-magenta: #c7a6e0;
-  --kelpi-term-bright-cyan: #7fcaca;
-  --kelpi-term-bright-white: #f2f2f6;
+  --kelpi-term-bg: #262624;
+  --kelpi-term-fg: #f0eee6;
+  --kelpi-term-cursor: #d97757;
+  --kelpi-term-cursor-accent: #262624;
+  --kelpi-term-selection-bg: #5c3e33;
+  --kelpi-term-selection-fg: #faf9f5;
+  --kelpi-term-black: #3a3936;
+  --kelpi-term-red: #e07b6e;
+  --kelpi-term-green: #a4c58e;
+  --kelpi-term-yellow: #e6c07a;
+  --kelpi-term-blue: #86aedd;
+  --kelpi-term-magenta: #c9a0d6;
+  --kelpi-term-cyan: #82c4b8;
+  --kelpi-term-white: #c2c0b6;
+  --kelpi-term-bright-black: #86847c;
+  --kelpi-term-bright-red: #ee9a8e;
+  --kelpi-term-bright-green: #bcd7aa;
+  --kelpi-term-bright-yellow: #f0d39c;
+  --kelpi-term-bright-blue: #a6c4e8;
+  --kelpi-term-bright-magenta: #dbbae3;
+  --kelpi-term-bright-cyan: #a2d6cc;
+  --kelpi-term-bright-white: #faf9f5;
 
   /* type */
   --kelpi-font-ui: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
   --kelpi-font-mono: "JetBrainsMono Nerd Font", ui-monospace, SFMono-Regular, Menlo, monospace;
+  /* Titles only (`skin.css`). Charter ships with macOS; Bitstream Charter is the same face on Linux. */
+  --kelpi-font-serif: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, serif;
 }
 
 /* The light column, twice: the media query is the pre-hydration answer, the attribute is what
@@ -120,52 +122,52 @@
   :root:not([data-kelpi-theme="dark"]) {
     color-scheme: light;
 
-    --kelpi-bg: #eae8e2;
-    --kelpi-window-fill: #eae8e2; /* §N17 — the ground; see the dark block */
-    --kelpi-sidebar-bg: #efeee9;
+    --kelpi-bg: #f0eee6;
+    --kelpi-window-fill: #f0eee6; /* §N17 — the ground; see the dark block */
+    --kelpi-sidebar-bg: #f0eee6;
     --kelpi-surface: #ffffff;
     --kelpi-surface-bg: #ffffff;
-    --kelpi-header-bg: #f7f6f2;
-    --kelpi-footer-bg: #efeee9;
-    --kelpi-fg: #2b2b2e;
-    --kelpi-fg-secondary: #6b6c70;
-    --kelpi-fg-tertiary: #9a9a96;
-    --kelpi-border: #dedcd5;
-    --kelpi-selection-fill: rgba(94, 138, 196, 0.16);
-    --kelpi-selection-stroke: #5e8ac4;
-    --kelpi-accent: #5e8ac4;
-    --kelpi-pane-focus: #5e8ac4;
-    --kelpi-status-running: #4fa46b;
-    --kelpi-status-waiting: #5e8ac4;
-    --kelpi-status-inactive: #9a9a96;
-    --kelpi-active-agent: #a97c17;
-    --kelpi-agent: #a97c17;
+    --kelpi-header-bg: #faf9f5;
+    --kelpi-footer-bg: #f0eee6;
+    --kelpi-fg: #1f1e1d;
+    --kelpi-fg-secondary: #5f5e59;
+    --kelpi-fg-tertiary: #8f8d86;
+    --kelpi-border: #dddbd2;
+    --kelpi-selection-fill: rgba(201, 100, 66, 0.12);
+    --kelpi-selection-stroke: #c96442;
+    --kelpi-accent: #c96442;
+    --kelpi-pane-focus: #c96442;
+    --kelpi-status-running: #5b8f4e;
+    --kelpi-status-waiting: #c96442;
+    --kelpi-status-inactive: #9c9a92;
+    --kelpi-active-agent: #a8732a;
+    --kelpi-agent: #a8732a;
     /* L27 — the light column of the header orange, derived from #d08237 by the same
        per-channel ratio that takes --kelpi-agent from #d3a329 to #a97c17. */
-    --kelpi-orange: #a8631f;
-    --kelpi-group-band-opacity: 0.3;
+    --kelpi-orange: #b5602f;
+    --kelpi-group-band-opacity: 0.22;
 
-    --kelpi-term-bg: #ffffff;
-    --kelpi-term-fg: #2b2b2e;
-    --kelpi-term-cursor: #2b2b2e;
-    --kelpi-term-cursor-accent: #ffffff;
-    --kelpi-term-selection-bg: #cfe0f5;
-    --kelpi-term-selection-fg: #2b2b2e;
-    --kelpi-term-black: #2b2b2e;
-    --kelpi-term-red: #d0453c;
-    --kelpi-term-green: #3f9457;
-    --kelpi-term-yellow: #b99413;
-    --kelpi-term-blue: #3d74c0;
-    --kelpi-term-magenta: #8158c8;
-    --kelpi-term-cyan: #3f8f8f;
-    --kelpi-term-white: #d8d6d0;
-    --kelpi-term-bright-black: #6b6c70;
-    --kelpi-term-bright-red: #e0655c;
-    --kelpi-term-bright-green: #4fa46b;
-    --kelpi-term-bright-yellow: #c8a52a;
-    --kelpi-term-bright-blue: #5e8ac4;
-    --kelpi-term-bright-magenta: #9a72dd;
-    --kelpi-term-bright-cyan: #4fa8a8;
+    --kelpi-term-bg: #faf9f5;
+    --kelpi-term-fg: #1f1e1d;
+    --kelpi-term-cursor: #c96442;
+    --kelpi-term-cursor-accent: #faf9f5;
+    --kelpi-term-selection-bg: #f1d9cc;
+    --kelpi-term-selection-fg: #1f1e1d;
+    --kelpi-term-black: #3d3d3a;
+    --kelpi-term-red: #bf4a3d;
+    --kelpi-term-green: #4e8044;
+    --kelpi-term-yellow: #9c6b10;
+    --kelpi-term-blue: #2f6bb0;
+    --kelpi-term-magenta: #8a4fa3;
+    --kelpi-term-cyan: #2d7d74;
+    --kelpi-term-white: #d8d6cc;
+    --kelpi-term-bright-black: #8b8982;
+    --kelpi-term-bright-red: #d4604f;
+    --kelpi-term-bright-green: #649958;
+    --kelpi-term-bright-yellow: #b5852a;
+    --kelpi-term-bright-blue: #4a85c9;
+    --kelpi-term-bright-magenta: #a36abb;
+    --kelpi-term-bright-cyan: #3e978d;
     --kelpi-term-bright-white: #ffffff;
   }
 }
@@ -173,51 +175,51 @@
 :root[data-kelpi-theme="light"] {
   color-scheme: light;
 
-  --kelpi-bg: #eae8e2;
-  --kelpi-window-fill: #eae8e2; /* §N17 — the ground; see the dark block */
-  --kelpi-sidebar-bg: #efeee9;
+  --kelpi-bg: #f0eee6;
+  --kelpi-window-fill: #f0eee6; /* §N17 — the ground; see the dark block */
+  --kelpi-sidebar-bg: #f0eee6;
   --kelpi-surface: #ffffff;
   --kelpi-surface-bg: #ffffff;
-  --kelpi-header-bg: #f7f6f2;
-  --kelpi-footer-bg: #efeee9;
-  --kelpi-fg: #2b2b2e;
-  --kelpi-fg-secondary: #6b6c70;
-  --kelpi-fg-tertiary: #9a9a96;
-  --kelpi-border: #dedcd5;
-  --kelpi-selection-fill: rgba(94, 138, 196, 0.16);
-  --kelpi-selection-stroke: #5e8ac4;
-  --kelpi-accent: #5e8ac4;
-  --kelpi-pane-focus: #5e8ac4;
-  --kelpi-status-running: #4fa46b;
-  --kelpi-status-waiting: #5e8ac4;
-  --kelpi-status-inactive: #9a9a96;
-  --kelpi-active-agent: #a97c17;
-  --kelpi-agent: #a97c17;
+  --kelpi-header-bg: #faf9f5;
+  --kelpi-footer-bg: #f0eee6;
+  --kelpi-fg: #1f1e1d;
+  --kelpi-fg-secondary: #5f5e59;
+  --kelpi-fg-tertiary: #8f8d86;
+  --kelpi-border: #dddbd2;
+  --kelpi-selection-fill: rgba(201, 100, 66, 0.12);
+  --kelpi-selection-stroke: #c96442;
+  --kelpi-accent: #c96442;
+  --kelpi-pane-focus: #c96442;
+  --kelpi-status-running: #5b8f4e;
+  --kelpi-status-waiting: #c96442;
+  --kelpi-status-inactive: #9c9a92;
+  --kelpi-active-agent: #a8732a;
+  --kelpi-agent: #a8732a;
   /* L27 — see the media-query block above. */
-  --kelpi-orange: #a8631f;
-  --kelpi-group-band-opacity: 0.3;
+  --kelpi-orange: #b5602f;
+  --kelpi-group-band-opacity: 0.22;
 
-  --kelpi-term-bg: #ffffff;
-  --kelpi-term-fg: #2b2b2e;
-  --kelpi-term-cursor: #2b2b2e;
-  --kelpi-term-cursor-accent: #ffffff;
-  --kelpi-term-selection-bg: #cfe0f5;
-  --kelpi-term-selection-fg: #2b2b2e;
-  --kelpi-term-black: #2b2b2e;
-  --kelpi-term-red: #d0453c;
-  --kelpi-term-green: #3f9457;
-  --kelpi-term-yellow: #b99413;
-  --kelpi-term-blue: #3d74c0;
-  --kelpi-term-magenta: #8158c8;
-  --kelpi-term-cyan: #3f8f8f;
-  --kelpi-term-white: #d8d6d0;
-  --kelpi-term-bright-black: #6b6c70;
-  --kelpi-term-bright-red: #e0655c;
-  --kelpi-term-bright-green: #4fa46b;
-  --kelpi-term-bright-yellow: #c8a52a;
-  --kelpi-term-bright-blue: #5e8ac4;
-  --kelpi-term-bright-magenta: #9a72dd;
-  --kelpi-term-bright-cyan: #4fa8a8;
+  --kelpi-term-bg: #faf9f5;
+  --kelpi-term-fg: #1f1e1d;
+  --kelpi-term-cursor: #c96442;
+  --kelpi-term-cursor-accent: #faf9f5;
+  --kelpi-term-selection-bg: #f1d9cc;
+  --kelpi-term-selection-fg: #1f1e1d;
+  --kelpi-term-black: #3d3d3a;
+  --kelpi-term-red: #bf4a3d;
+  --kelpi-term-green: #4e8044;
+  --kelpi-term-yellow: #9c6b10;
+  --kelpi-term-blue: #2f6bb0;
+  --kelpi-term-magenta: #8a4fa3;
+  --kelpi-term-cyan: #2d7d74;
+  --kelpi-term-white: #d8d6cc;
+  --kelpi-term-bright-black: #8b8982;
+  --kelpi-term-bright-red: #d4604f;
+  --kelpi-term-bright-green: #649958;
+  --kelpi-term-bright-yellow: #b5852a;
+  --kelpi-term-bright-blue: #4a85c9;
+  --kelpi-term-bright-magenta: #a36abb;
+  --kelpi-term-bright-cyan: #3e978d;
   --kelpi-term-bright-white: #ffffff;
 }
 

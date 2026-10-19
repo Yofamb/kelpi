@@ -718,38 +718,38 @@ export const ENGINE_STARTUP_GATE_TIMEOUT_MS = 10_000;
 export const RESIZE_PAINT_HOLD_TIMEOUT_MS = 1_000;
 
 /**
- * Dark palette matching the chrome tokens (`--kelpi-bg` / `--kelpi-fg`). Hex only — see
+ * Dark palette matching the chrome tokens (`--kelpi-header-bg` / `--kelpi-fg`). Hex only — see
  * `TerminalTheme`.
  *
- * The foreground is **ghostty's own default** (`#FFFFFF`, `src/config/Config.zig`), not the
- * chrome's `textPrimary`. The terminal is ghostty's surface, and a body dimmer than the pane
- * header that frames it is precisely the "ordinary output reads like SGR dim" the audit found
- * (run-B L4): against `#0A0A0C` the chrome grey is 17.7:1 while ghostty's white is 20.4:1, and
- * the difference is exactly the gap a user reads as "this text is faint".
+ * The background is the pane-header colour, so a terminal and the header above it read as one
+ * card on the window ground. The foreground is the chrome's `textPrimary`, never dimmer: a body
+ * dimmer than the pane header that frames it is precisely the "ordinary output reads like SGR
+ * dim" the audit found (run-B L4). The cursor is the accent, and the ANSI colours are softened,
+ * warm-leaning versions of the usual sixteen.
  */
 export const DEFAULT_TERMINAL_THEME: TerminalTheme = {
-    background: '#0A0A0C',
-    foreground: '#FFFFFF',
-    cursor: '#FFFFFF',
-    cursorAccent: '#0A0A0C',
-    selectionBackground: '#2A3550',
-    selectionForeground: '#E6E6EA',
-    black: '#15151A',
-    red: '#D9707A',
-    green: '#5FBE89',
-    yellow: '#D3A329',
-    blue: '#6F9BD8',
-    magenta: '#B18AD1',
-    cyan: '#5FB3B3',
-    white: '#C9C9D1',
-    brightBlack: '#4A4A55',
-    brightRed: '#E88E96',
-    brightGreen: '#7FD4A3',
-    brightYellow: '#E5BE55',
-    brightBlue: '#8FB5E6',
-    brightMagenta: '#C7A6E0',
-    brightCyan: '#7FCACA',
-    brightWhite: '#F2F2F6'
+    background: '#262624',
+    foreground: '#F0EEE6',
+    cursor: '#D97757',
+    cursorAccent: '#262624',
+    selectionBackground: '#5C3E33',
+    selectionForeground: '#FAF9F5',
+    black: '#3A3936',
+    red: '#E07B6E',
+    green: '#A4C58E',
+    yellow: '#E6C07A',
+    blue: '#86AEDD',
+    magenta: '#C9A0D6',
+    cyan: '#82C4B8',
+    white: '#C2C0B6',
+    brightBlack: '#86847C',
+    brightRed: '#EE9A8E',
+    brightGreen: '#BCD7AA',
+    brightYellow: '#F0D39C',
+    brightBlue: '#A6C4E8',
+    brightMagenta: '#DBBAE3',
+    brightCyan: '#A2D6CC',
+    brightWhite: '#FAF9F5'
 };
 
 /**
@@ -762,27 +762,27 @@ export const DEFAULT_TERMINAL_THEME: TerminalTheme = {
  * (run-B L4): the values were never wrong, the *timing* was.
  */
 export const LIGHT_TERMINAL_THEME: TerminalTheme = {
-    background: '#FFFFFF',
-    foreground: '#2B2B2E',
-    cursor: '#2B2B2E',
-    cursorAccent: '#FFFFFF',
-    selectionBackground: '#CFE0F5',
-    selectionForeground: '#2B2B2E',
-    black: '#2B2B2E',
-    red: '#D0453C',
-    green: '#3F9457',
-    yellow: '#B99413',
-    blue: '#3D74C0',
-    magenta: '#8158C8',
-    cyan: '#3F8F8F',
-    white: '#D8D6D0',
-    brightBlack: '#6B6C70',
-    brightRed: '#E0655C',
-    brightGreen: '#4FA46B',
-    brightYellow: '#C8A52A',
-    brightBlue: '#5E8AC4',
-    brightMagenta: '#9A72DD',
-    brightCyan: '#4FA8A8',
+    background: '#FAF9F5',
+    foreground: '#1F1E1D',
+    cursor: '#C96442',
+    cursorAccent: '#FAF9F5',
+    selectionBackground: '#F1D9CC',
+    selectionForeground: '#1F1E1D',
+    black: '#3D3D3A',
+    red: '#BF4A3D',
+    green: '#4E8044',
+    yellow: '#9C6B10',
+    blue: '#2F6BB0',
+    magenta: '#8A4FA3',
+    cyan: '#2D7D74',
+    white: '#D8D6CC',
+    brightBlack: '#8B8982',
+    brightRed: '#D4604F',
+    brightGreen: '#649958',
+    brightYellow: '#B5852A',
+    brightBlue: '#4A85C9',
+    brightMagenta: '#A36ABB',
+    brightCyan: '#3E978D',
     brightWhite: '#FFFFFF'
 };
 

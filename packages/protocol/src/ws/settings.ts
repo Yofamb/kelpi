@@ -365,6 +365,14 @@ export const DEFAULT_WS_TERMINAL_THEME: WsTerminalThemeResolution = {
 export interface WsAppearanceSettings {
     /** `#rrggbb` (lowercase). Always concrete — `isDark` is derived from it. */
     readonly backgroundColor: string;
+    /**
+     * Did `backgroundColor` come from the user — a `background = …` line, or a resolved `theme`
+     * that supplies one? False means it is `DEFAULT_SETTINGS_BACKGROUND`, which nobody chose, so a
+     * client may paint its own appearance's terminal background instead: a light window then
+     * gets light terminals rather than a dark pane under a light palette. Additive: a daemon that
+     * predates it omits the field, which reads as true, the behaviour before it existed.
+     */
+    readonly backgroundConfigured?: boolean;
     /** 0..1. */
     readonly backgroundOpacity: number;
     /** A CSS font stack built from the ghostty `font-family` lines; null = host default. */
@@ -430,7 +438,7 @@ export interface WsRemoteDaemon {
 }
 
 /** Matches the web client's `--kelpi-term-bg` fallback and the daemon's content-render default. */
-export const DEFAULT_SETTINGS_BACKGROUND = '#0a0a0c';
+export const DEFAULT_SETTINGS_BACKGROUND = '#262624';
 
 /** What "neither config file exists" produces. */
 export const DEFAULT_WS_SETTINGS: WsSettingsSnapshot = {
@@ -466,6 +474,7 @@ export const DEFAULT_WS_SETTINGS: WsSettingsSnapshot = {
     },
     appearance: {
         backgroundColor: DEFAULT_SETTINGS_BACKGROUND,
+        backgroundConfigured: false,
         backgroundOpacity: 1,
         fontFamily: null,
         fontSize: null,

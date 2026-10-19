@@ -165,26 +165,31 @@ interface ChromeTheme {
 }
 ```
 
+The defaults are the Claude desktop app's warm palette rather than the Swift app's: warm
+neutrals, one ground shared by the window, sidebar, title bar and status bar, pane headers the
+colour of the terminal below them, and Claude's clay as the single accent. The window's shape
+(cards, gutters, soft focus) is `packages/client/src/skin.css`.
+
 | token | light | dark |
 |---|---|---|
-| windowBackground | `#EAE8E2` | `#0A0A0C` |
-| sidebarBackground | `#EFEEE9` | `#0C0C10` |
-| surfaceBackground | `#FFFFFF` | `#101013` |
-| headerBackground | `#F7F6F2` | `#13131A` |
-| footerBackground | `#EFEEE9` | `#0C0C10` |
-| textPrimary | `#2B2B2E` | `#E6E6EA` |
-| textSecondary | `#6B6C70` | `#9A9AA0` |
-| textTertiary | `#9A9A96` | `#6A6A72` |
-| divider | `#DEDCD5` | `#24242B` |
-| selectionFill | `#5E8AC4` @ 0.16 | `#5276B8` @ 0.24 |
-| selectionStroke | `#5E8AC4` | `#5276B8` |
-| accent | `#5E8AC4` | `#6F9BD8` |
-| paneFocus | `#5E8AC4` | `#6F9BD8` |
-| statusRunning | `#4FA46B` | `#5FBE89` |
-| statusWaiting | `#5E8AC4` | `#6F9BD8` |
-| statusInactive | `#9A9A96` | `#8A8A92` |
-| activeAgent | `#A97C17` | `#D3A329` |
-| groupBandOpacity | 0.30 | 0.22 |
+| windowBackground | `#F0EEE6` | `#1F1E1D` |
+| sidebarBackground | `#F0EEE6` | `#1F1E1D` |
+| surfaceBackground | `#FFFFFF` | `#2C2B28` |
+| headerBackground | `#FAF9F5` | `#262624` |
+| footerBackground | `#F0EEE6` | `#1F1E1D` |
+| textPrimary | `#1F1E1D` | `#F0EEE6` |
+| textSecondary | `#5F5E59` | `#B4B1A7` |
+| textTertiary | `#8F8D86` | `#85837B` |
+| divider | `#DDDBD2` | `#3A3935` |
+| selectionFill | `#C96442` @ 0.12 | `#D97757` @ 0.16 |
+| selectionStroke | `#C96442` | `#D97757` |
+| accent | `#C96442` | `#D97757` |
+| paneFocus | `#C96442` | `#D97757` |
+| statusRunning | `#5B8F4E` | `#8CBF7F` |
+| statusWaiting | `#C96442` | `#D97757` |
+| statusInactive | `#9C9A92` | `#87857E` |
+| activeAgent | `#A8732A` | `#D9A35B` |
+| groupBandOpacity | 0.22 | 0.16 |
 
 ### Overridable keys
 

@@ -62,7 +62,7 @@ export function isDarkBackground(color: string): boolean {
  * do not. It matches the web client's `--kelpi-term-bg` fallback so an unconfigured daemon and an
  * unconfigured client agree on light/dark.
  */
-export const DEFAULT_CONTENT_BACKGROUND = '#0A0A0C';
+export const DEFAULT_CONTENT_BACKGROUND = '#262624';
 
 /** §3.8: accepted for parity, unused by the renderers (the pane container applies it). */
 export const DEFAULT_CONTENT_BACKGROUND_OPACITY = 1;

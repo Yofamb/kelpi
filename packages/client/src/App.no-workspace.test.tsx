@@ -97,7 +97,7 @@ describe('the no-workspace empty state (§APP-067 / §WS-156)', () => {
         expect(empty.className).toContain('gap-2');
         expect(empty.className).not.toContain('gap-3');
         expect(screen.getByTestId('no-workspace-glyph').style.color).toBe(
-            'color-mix(in srgb, var(--kelpi-fg, #E6E6EA) 10%, transparent)'
+            'color-mix(in srgb, var(--kelpi-fg, #F0EEE6) 10%, transparent)'
         );
         const button = screen.getByTestId('no-workspace-create');
         expect(button.hasAttribute('autofocus')).toBe(false);

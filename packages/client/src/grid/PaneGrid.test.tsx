@@ -803,7 +803,7 @@ describe('PaneGrid system-accent surfaces (M13)', () => {
         renderGrid();
         const bar = screen.getByTestId('divider-d').firstElementChild as HTMLElement;
         expect(bar.style.background).toBe(
-            'color-mix(in srgb, var(--kelpi-fg-secondary, #9A9AA0) 20%, var(--kelpi-border, #24242B))'
+            'color-mix(in srgb, var(--kelpi-fg-secondary, #B4B1A7) 20%, var(--kelpi-border, #3A3935))'
         );
     });
 });

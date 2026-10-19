@@ -700,7 +700,7 @@ export function PlainTextEditor(props: PlainTextEditorProps): ReactElement {
             data-pane-id={paneID}
             className="relative flex h-full w-full overflow-hidden"
             style={{
-                background: props.background ?? 'var(--kelpi-term-bg, #0A0A0C)',
+                background: props.background ?? 'var(--kelpi-term-bg, #262624)',
                 visibility: props.visible === false ? 'hidden' : 'visible'
             }}
             onMouseDownCapture={() => latest.current.onFocusRequest?.(paneID)}

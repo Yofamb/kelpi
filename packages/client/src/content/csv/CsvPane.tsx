@@ -43,6 +43,8 @@ export interface CsvPaneProps {
     readonly focused?: boolean | undefined;
     readonly visible?: boolean | undefined;
     readonly background?: string | undefined;
+    /** The window's light/dark for this pane, over the render's own (`MarkdownPaneProps.isDark`). */
+    readonly isDark?: boolean | undefined;
     readonly phone?: boolean | undefined;
     readonly findToken?: number | undefined;
     readonly findPalette?: Partial<FindPalette> | undefined;
@@ -127,7 +129,7 @@ function CsvRawEditor(props: CsvPaneProps): ReactElement {
             paneID={paneID}
             ariaLabel={contentPaneLabel('csv editor', paneID, state.filePath)}
             value={state.text ?? ''}
-            isDark={state.isDark}
+            isDark={props.isDark ?? state.isDark}
             focused={props.focused}
             visible={props.visible}
             background={props.background}

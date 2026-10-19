@@ -32,6 +32,8 @@ export interface DiffPaneProps {
     readonly background?: string | undefined;
     /** The opaque fill painted inside the sandboxed frame (`bridge.ts` → `frameBaseStyle`). */
     readonly documentBackground?: string | undefined;
+    /** The window's light/dark for this pane, over the render's own (`MarkdownPaneProps.isDark`). */
+    readonly isDark?: boolean | undefined;
     readonly onFocusRequest?: ((paneID: string) => void) | undefined;
     readonly scrollStore?: ScrollStore | undefined;
     readonly writeClipboard?: ClipboardWriter | undefined;
@@ -79,7 +81,7 @@ export function DiffPane(props: DiffPaneProps): ReactElement {
             visible={props.visible}
             background={props.background}
             documentBackground={props.documentBackground}
-            isDark={state.isDark}
+            isDark={props.isDark ?? state.isDark}
             onFocusRequest={props.onFocusRequest}
             scrollStore={props.scrollStore}
             writeClipboard={props.writeClipboard}

@@ -36,6 +36,7 @@ export function bindDocumentFeatures(props: DocumentFeatureProps): readonly Bund
                     focused={props.focused}
                     visible={context.visible}
                     background={props.background}
+                    isDark={props.isDark}
                     phone={props.phone}
                     findToken={props.findToken}
                     findPalette={props.findPalette}

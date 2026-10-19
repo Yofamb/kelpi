@@ -359,6 +359,9 @@ export function buildSettingsSnapshot(
             // Everything downstream (pane fill, window compositing, the daemon's markdown /
             // diff HTML) reads this one field, so the theme reaches all of them at once.
             backgroundColor,
+            // Whether anyone chose that colour: a client paints its own appearance's terminal
+            // background in place of an unchosen default (`WsAppearanceSettings`).
+            backgroundConfigured: appearance.hasExplicitBackground || themeBackground !== undefined,
             backgroundOpacity: appearance.backgroundOpacity,
             fontFamily: appearance.fontFamily,
             fontSize: appearance.fontSize,
