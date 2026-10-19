@@ -5,7 +5,7 @@ import { constants } from 'node:fs';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { gzip, gunzip } from 'node:zlib';
-import { decodePluginManifest, isBuiltinCliVerb, pluginAssetPath, pluginManifestWarnings, pluginRecord, type PluginManifest } from '@kelpi/protocol';
+import { PLUGIN_MAX_STYLE_BYTES, decodePluginManifest, isBuiltinCliVerb, pluginAssetPath, pluginManifestWarnings, pluginRecord, type PluginManifest } from '@kelpi/protocol';
 
 export const PLUGIN_PACKAGE_MAX_BYTES = 32 * 1024 * 1024;
 export const PLUGIN_PACKAGE_MAX_FILES = 2000;
@@ -67,8 +67,15 @@ function validateFiles(files: PluginPackageFile[], format: PluginPackage['format
     // reads stored manifests at boot: a verb a later release makes built-in only stops resolving.
     const builtin = manifest.contributes.cli?.find(verb => isBuiltinCliVerb(verb.name));
     if (builtin) throw new Error(`cli verb "${builtin.name}" is a built-in kelpi command`);
-    for (const entry of [...manifest.contributes.views.map(view => view.entry), ...(manifest.backend ? [manifest.backend] : [])]) {
+    const styles = manifest.contributes.styles ?? [];
+    for (const entry of [...manifest.contributes.views.map(view => view.entry), ...styles.map(style => style.entry), ...(manifest.backend ? [manifest.backend] : [])]) {
         if (!files.some(file => file.relative === entry)) throw new Error(`missing plugin entry: ${entry}`);
+    }
+    // A stylesheet travels to every client in the plugin list, so it is bounded where it is read.
+    for (const style of styles) {
+        if (files.find(file => file.relative === style.entry)!.bytes.length > PLUGIN_MAX_STYLE_BYTES) {
+            throw new Error(`plugin stylesheet exceeds ${String(PLUGIN_MAX_STYLE_BYTES / 1024)} KiB: ${style.entry}`);
+        }
     }
     const hash = createHash('sha256');
     for (const file of files) hash.update(file.relative).update('\0').update(String(file.bytes.length)).update('\0').update(file.bytes);

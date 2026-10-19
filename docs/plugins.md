@@ -686,6 +686,61 @@ terminal cannot swallow them. Modal overlays and remote-workspace focus suspend 
 daemon's plugin keybindings. `onContext(listener)` reports the view's initial environment
 after `ready`, then context/state/theme/visibility changes; its return function unsubscribes.
 
+## Themes
+
+A plugin restyles Kelpi itself with `contributes.styles`: CSS files under `ui/`, applied while
+the plugin is enabled and removed when it is disabled. A theme needs no backend and no views;
+[`examples/plugins/warm-theme`](../examples/plugins/warm-theme) is a complete one.
+
+```json
+"contributes": {
+  "styles": [
+    { "id": "acme.warm.window", "entry": "ui/theme.css" },
+    { "id": "acme.warm.documents", "entry": "ui/documents.css", "target": "documents" }
+  ]
+}
+```
+
+- `"target": "window"`, the default, styles the app. The client appends the sheet to its own
+  `<head>`, after Kelpi's CSS, on desktop and phone.
+- `"target": "documents"` styles what markdown and diff panes render. The sheet is appended to
+  each pane's sandboxed document after the daemon's stylesheet, and `<html>` carries `dark` or
+  `light` for the background the pane is painted on.
+
+Each sheet is limited to 128 KiB, checked by `validate`, `pack` and `install`. The daemon reads
+the sheets from the selected revision and serves them through the `styles` plugin action rather
+than the plugin list, so `kelpi plugin list` stays readable. The client asks again whenever an
+active plugin with styles is installed, enabled, disabled, reloaded or moved to another
+revision. A window applies the sheets of its own daemon, not those of a remote daemon it is
+showing.
+
+Kelpi writes its chrome palette inline on every element that carries `data-kelpi-theme`
+(`:root` and the app's theme root), so overriding a token takes `!important`:
+
+```css
+[data-kelpi-theme='dark'] {
+  --kelpi-bg: #1f1e1d !important;
+  --kelpi-accent: #d97757 !important;
+}
+
+:root[data-kelpi-theme='dark'] {
+  --kelpi-term-bg: #262624 !important;
+  --kelpi-term-fg: #f0eee6 !important;
+}
+```
+
+The `--kelpi-term-*` tokens (`TERMINAL_TOKEN_NAMES` in `packages/client/src/terminal/renderer.ts`)
+are the terminal palette. Set them on `:root` only. The app's theme root carries the user's own
+ghostty theme, so a `theme` or `background` line in the ghostty config still wins, and a theme's
+terminal colours apply to terminals whose colours nobody chose. For those, `--kelpi-term-bg` also
+paints the terminal background, and content panes take their light or dark from it (the settings
+snapshot's `backgroundConfigured` says whether anyone chose a background). Terminal padding is
+ghostty's `window-padding-x` and `window-padding-y`, not a style.
+
+Every other selector is one of Kelpi's `data-testid` and `data-*` hooks. They are not a stable
+API: a release that renames one leaves a rule matching nothing, which falls back to Kelpi's own
+look for that element.
+
 ## Hiding bands and Zen Mode
 
 The root of the desktop window is the pane grid with five bands around it: the toolbar

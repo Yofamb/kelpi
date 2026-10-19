@@ -93,6 +93,30 @@ describe('prepareContentDocument', () => {
         expect(frameBaseStyle('#101013', 'dark')).toContain('background-color:#101013');
     });
 
+    // Theme plugins' `documents` sheets: after the daemon's own, and never able to end their element.
+    it('appends theme stylesheets last in the head, with a closing tag in the text defused', () => {
+        const html = '<!DOCTYPE html>\n<html class="dark">\n<head>\n<style>body { color: #fff; }</style>\n</head>\n<body><p>hi</p></body>\n</html>\n';
+        const prepared = prepareContentDocument(html, { paneID: PANE, styles: ['body { color: #e9e7df; }', 'p::after { content: "</style><script>x()</script>"; }'] });
+        const parsed = new DOMParser().parseFromString(prepared, 'text/html');
+        const themed = [...parsed.head.querySelectorAll('style[data-kelpi-plugin-style]')];
+        expect(themed.map((style) => style.textContent)).toEqual([
+            'body { color: #e9e7df; }',
+            'p::after { content: "<\\/style><script>x()</script>"; }'
+        ]);
+        expect(parsed.head.lastElementChild).toBe(themed[1]);
+        // Only the bridge script made it into the body: the second sheet stayed one element.
+        expect(parsed.body.querySelectorAll('script')).toHaveLength(1);
+    });
+
+    it('gives the document the light/dark of the background it is painted on', () => {
+        const html = '<html class="dark"><head></head><body></body></html>';
+        const light = new DOMParser().parseFromString(prepareContentDocument(html, { paneID: PANE, colorScheme: 'light' }), 'text/html');
+        expect([...light.documentElement.classList]).toEqual(['light']);
+        // A document without the daemon's class is left as it came.
+        const bare = new DOMParser().parseFromString(prepareContentDocument('<html><head></head><body></body></html>', { paneID: PANE, colorScheme: 'light' }), 'text/html');
+        expect(bare.documentElement.classList).toHaveLength(0);
+    });
+
     it('carries the pane id into the script so a message names its sender', () => {
         expect(contentBridgeScript(PANE)).toContain(JSON.stringify(PANE));
     });

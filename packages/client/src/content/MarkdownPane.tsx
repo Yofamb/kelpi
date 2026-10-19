@@ -37,6 +37,12 @@ export interface MarkdownPaneProps {
     readonly background?: string | undefined;
     /** The opaque fill painted inside the sandboxed frame (`bridge.ts` → `frameBaseStyle`). */
     readonly documentBackground?: string | undefined;
+    /**
+     * Whether the pane is on a dark background, when the window knows better than the render: a
+     * theme plugin painting a background nobody chose (`App.tsx`'s `panesDark`). Absent, the
+     * daemon's own `isDark` from the render stands.
+     */
+    readonly isDark?: boolean | undefined;
     readonly onFocusRequest?: ((paneID: string) => void) | undefined;
     readonly onToggleEdit?: ((paneID: string) => void) | undefined;
     readonly scrollStore?: ScrollStore | undefined;
@@ -95,7 +101,7 @@ export function MarkdownPane(props: MarkdownPaneProps): ReactElement {
                 // §L46: the file's name and a four-character id, never the raw UUID.
                 ariaLabel={contentPaneLabel('markdown editor', paneID, state.filePath)}
                 value={state.text ?? ''}
-                isDark={state.isDark}
+                isDark={props.isDark ?? state.isDark}
                 focused={props.focused}
                 visible={props.visible}
                 background={props.background}
@@ -133,7 +139,7 @@ export function MarkdownPane(props: MarkdownPaneProps): ReactElement {
             visible={props.visible}
             background={props.background}
             documentBackground={props.documentBackground}
-            isDark={state.isDark}
+            isDark={props.isDark ?? state.isDark}
             onFocusRequest={props.onFocusRequest}
             onToggleEdit={props.onToggleEdit}
             scrollStore={props.scrollStore}

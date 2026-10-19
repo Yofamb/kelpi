@@ -1,0 +1,14 @@
+{
+  "id": "example.warm-theme",
+  "name": "Warm",
+  "version": "1.0.0",
+  "apiVersion": 1,
+  "trust": "full",
+  "activation": "startup",
+  "contributes": {
+    "styles": [
+      { "id": "example.warm-theme.window", "entry": "ui/theme.css" },
+      { "id": "example.warm-theme.documents", "entry": "ui/documents.css", "target": "documents" }
+    ]
+  }
+}

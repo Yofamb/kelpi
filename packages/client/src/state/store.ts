@@ -557,6 +557,11 @@ export function hydrateSettings(raw: unknown): WsSettingsSnapshot | null {
                 typeof appearance['backgroundColor'] === 'string' && appearance['backgroundColor'] !== ''
                     ? appearance['backgroundColor']
                     : fallbackAppearance.backgroundColor,
+            // Absent from a daemon that predates it, and left absent, which reads as "configured":
+            // that daemon's background is honoured exactly as it was before the field existed.
+            ...(typeof appearance['backgroundConfigured'] === 'boolean'
+                ? { backgroundConfigured: appearance['backgroundConfigured'] }
+                : {}),
             backgroundOpacity: Math.min(
                 1,
                 Math.max(0, num(appearance['backgroundOpacity'], fallbackAppearance.backgroundOpacity))

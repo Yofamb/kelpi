@@ -359,6 +359,9 @@ export function buildSettingsSnapshot(
             // Everything downstream (pane fill, window compositing, the daemon's markdown /
             // diff HTML) reads this one field, so the theme reaches all of them at once.
             backgroundColor,
+            // Whether anyone chose that colour: a theme plugin may paint an unchosen default
+            // (`WsAppearanceSettings.backgroundConfigured`).
+            backgroundConfigured: appearance.hasExplicitBackground || themeBackground !== undefined,
             backgroundOpacity: appearance.backgroundOpacity,
             fontFamily: appearance.fontFamily,
             fontSize: appearance.fontSize,

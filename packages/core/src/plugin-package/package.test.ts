@@ -4,6 +4,7 @@ import path from 'node:path';
 import { gzipSync, gunzipSync } from 'node:zlib';
 import { afterEach, describe, expect, it } from 'vitest';
 import { packPlugin, pluginPackageReport, readPluginPackage, PLUGIN_PACKAGE_MAX_BYTES } from './index.js';
+import { PLUGIN_MAX_STYLE_BYTES } from '@kelpi/protocol';
 
 const roots: string[] = [];
 afterEach(() => { for (const root of roots.splice(0)) fs.rmSync(root, { recursive: true, force: true }); });
@@ -114,6 +115,16 @@ describe('shared plugin packaging', () => {
         await expect(readPluginPackage(h.source)).rejects.toThrow('plugin id');
         fs.unlinkSync(path.join(h.source, 'kelpi.plugin.json'));
         await expect(readPluginPackage(h.source)).rejects.toThrow('missing kelpi.plugin.json');
+    });
+    it('requires a theme stylesheet to be in the package and within the size limit', async () => {
+        const h = fixture();
+        fs.writeFileSync(path.join(h.source, 'kelpi.plugin.json'), JSON.stringify({ ...h.manifest, contributes: { ...h.manifest.contributes,
+            styles: [{ id: 'example.package.theme', entry: 'ui/theme.css' }] } }));
+        await expect(readPluginPackage(h.source)).rejects.toThrow('missing plugin entry: ui/theme.css');
+        fs.writeFileSync(path.join(h.source, 'ui/theme.css'), ':root { --kelpi-accent: #d97757 !important; }');
+        await expect(readPluginPackage(h.source)).resolves.toBeTruthy();
+        fs.writeFileSync(path.join(h.source, 'ui/theme.css'), `/* ${'x'.repeat(PLUGIN_MAX_STYLE_BYTES)} */`);
+        await expect(readPluginPackage(h.source)).rejects.toThrow('plugin stylesheet exceeds');
     });
     it('refuses a cli verb that is a built-in kelpi command before packing, validating or installing (#391)', async () => {
         const h = fixture();

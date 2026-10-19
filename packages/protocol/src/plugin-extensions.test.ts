@@ -77,4 +77,26 @@ describe('declarative plugin extension contracts', () => {
             expect(() => decodePluginManifest({ ...base, dependencies })).toThrow();
         }
     });
+
+    it('accepts theme stylesheets under ui/, defaulting to the window, and rejects anything else', () => {
+        const styles = [
+            { id: 'sample.board.theme', entry: 'ui/theme.css' },
+            { id: 'sample.board.documents', entry: 'ui/documents.css', target: 'documents' }
+        ];
+        expect(decodePluginManifest({ ...base, contributes: { styles } }).contributes.styles).toEqual([
+            { id: 'sample.board.theme', entry: 'ui/theme.css', target: 'window' },
+            { id: 'sample.board.documents', entry: 'ui/documents.css', target: 'documents' }
+        ]);
+        // No styles, no key: a manifest without them decodes exactly as before.
+        expect(decodePluginManifest(base).contributes).not.toHaveProperty('styles');
+        for (const style of [
+            { id: 'sample.board.theme', entry: 'theme.css' },
+            { id: 'sample.board.theme', entry: 'ui/theme.html' },
+            { id: 'sample.board.theme', entry: 'ui/../theme.css' },
+            { id: 'sample.board.theme', entry: 'ui/theme.css', target: 'everywhere' },
+            { id: 'other.board.theme', entry: 'ui/theme.css' }
+        ]) {
+            expect(() => decodePluginManifest({ ...base, contributes: { styles: [style] } })).toThrow();
+        }
+    });
 });

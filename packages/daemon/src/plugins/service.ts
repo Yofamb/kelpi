@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { newUUID } from '@kelpi/core/codec';
 import { readPluginPackage } from '@kelpi/core/plugin-package';
 import type { Pane } from '@kelpi/core/layout';
-import { PluginEventBuffer, pluginAssetPath, pluginDependencyOrder, pluginDependencyProblem, pluginJSON, pluginObject, pluginRecord, patchPluginContributionState, pluginSettingValue, type JsonObject, type JsonValue, type PluginContext, type PluginEvent, type PluginInfo, type PluginManifest, type PluginContributionState, type PluginContributionInfo, type PluginViewDefinition, type PluginPaneDescriptor, type PluginRevisionInfo, type PluginPlacement } from '@kelpi/protocol';
+import { PLUGIN_MAX_STYLE_BYTES, PluginEventBuffer, pluginAssetPath, pluginDependencyOrder, pluginDependencyProblem, pluginJSON, pluginObject, pluginRecord, patchPluginContributionState, pluginSettingValue, type JsonObject, type JsonValue, type PluginContext, type PluginEvent, type PluginInfo, type PluginManifest, type PluginContributionState, type PluginContributionInfo, type PluginViewDefinition, type PluginPaneDescriptor, type PluginRevisionInfo, type PluginPlacement, type PluginStyleSheet, type PluginStyles } from '@kelpi/protocol';
 import { isBuiltinCliVerb } from '@kelpi/protocol';
 import type { ReplyHandle, PtyManager, TerminalStateService } from '../seams.js';
 import type { KelpiStore } from '../store/store.js';
@@ -112,6 +112,8 @@ export class PluginService implements PluginChannel, PluginOperationChannel, Bui
     private readonly running = new Map<string, Running>();
     private readonly generations = new Map<string, number>();
     private readonly errors = new Map<string, string>();
+    /** `styleSheets`, by `<plugin id>@<revision>`. */
+    private readonly styleCache = new Map<string, readonly PluginStyleSheet[]>();
     private readonly watchers = new Set<(event: PluginEvent) => void>();
     private readonly logs = new Map<string, string[]>();
     private readonly leases = new Map<string, { pluginID: string; revision: string; context: PluginContext; expires: number; terminalPane?: TerminalPaneIdentity; browserPane?: Pick<Pane, 'createdAt'> }>();
@@ -202,6 +204,38 @@ export class PluginService implements PluginChannel, PluginOperationChannel, Bui
             const error = this.errors.get(item.manifest.id) ?? this.dependencyProblem(item.manifest.id);
             return { manifest: item.manifest, revision: item.revision, enabled: item.enabled, instanceID: `${this.epoch}:${this.generations.get(item.manifest.id) ?? 0}`, status: !item.enabled ? 'disabled' : error ? 'failed' : this.running.has(item.manifest.id) ? (this.running.get(item.manifest.id)!.activated ? 'running' : 'starting') : 'inactive', error };
         });
+    }
+    /**
+     * Every active plugin's stylesheets, for the `styles` action. Separate from `list` so the CLI's
+     * plugin output stays readable; a client asks again when the plugin list changes.
+     */
+    styles(): PluginStyles[] {
+        return this.list().filter(plugin => plugin.enabled && plugin.status !== 'failed' && !this.changing.has(plugin.manifest.id))
+            .flatMap(plugin => {
+                const styles = this.styleSheets(this.item(plugin.manifest.id));
+                return styles.length ? [{ pluginID: plugin.manifest.id, revision: plugin.revision, styles }] : [];
+            });
+    }
+    /**
+     * A theme's stylesheets, read once per installed revision (a revision's files never change)
+     * and handed to every client with the plugin list. Install validated each entry and its size;
+     * a file that has gone since is left out rather than failing the whole list.
+     */
+    private styleSheets(item: PluginInstallation): readonly PluginStyleSheet[] {
+        const definitions = item.manifest.contributes.styles ?? [];
+        if (!definitions.length) return [];
+        const key = `${item.manifest.id}@${item.revision}`;
+        const cached = this.styleCache.get(key);
+        if (cached) return cached;
+        const sheets: PluginStyleSheet[] = [];
+        for (const style of definitions) {
+            try {
+                const css = fs.readFileSync(this.asset(item.manifest.id, item.revision, style.entry), 'utf8');
+                if (Buffer.byteLength(css) <= PLUGIN_MAX_STYLE_BYTES) sheets.push({ id: style.id, target: style.target, css });
+            } catch { /* gone or unreadable: left out */ }
+        }
+        this.styleCache.set(key, sheets);
+        return sheets;
     }
     private dependencyProblem(id: string): string | null {
         return pluginDependencyProblem(id, [...this.installations.values()].map(item => ({ ...item, enabled: item.enabled && !this.changing.has(item.manifest.id), ...(this.errors.has(item.manifest.id) ? { status: 'failed', error: this.errors.get(item.manifest.id)! } : {}) })));
@@ -1076,6 +1110,7 @@ export class PluginService implements PluginChannel, PluginOperationChannel, Bui
         if (action === 'browser') return this.browserOperation(text(input['method'], 'method'), pluginObject(input['args']), context, operationScope().signal, context.clientID ? 'ui' : 'cli');
         if (action === 'list') { if (this.registryError) throw new Error(this.registryError); return this.list() as unknown as JsonValue; }
         if (action === 'contributions') return this.contributions() as unknown as JsonValue;
+        if (action === 'styles') return this.styles() as unknown as JsonValue;
         if (action === 'services') return this.services();
         if (action === 'service-call') return this.callService(input, context);
         if (action === 'service-select') return this.selectService(input);
