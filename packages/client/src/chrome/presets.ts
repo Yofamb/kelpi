@@ -20,7 +20,13 @@
  * with the exact Swift wording rather than decoded with its unknown fields silently dropped.
  */
 
-import { normalizeHexColor, type ChromeAppearance } from './theme';
+import {
+    OVERRIDABLE_CHROME_KEYS,
+    normalizeHexColor,
+    presetChromeTheme,
+    type ChromeAppearance,
+    type ChromeBucket
+} from './theme';
 
 /** The eleven colours a preset specifies, as bare `RRGGBB` (the Swift storage spelling). */
 export interface ChromePalette {
@@ -215,6 +221,22 @@ export const BUILT_IN_CHROME_THEMES: readonly BuiltInChromeTheme[] = [
     }
 ];
 
+/**
+ * Kelpi's own palette, the warm one `chrome/theme.ts` resolves when nothing is overridden, as a
+ * gallery card. It is not one of `BUILT_IN_CHROME_THEMES`: applying it writes no colours but
+ * CLEARS what a preset wrote (`defaultStyleTheme`), and it keeps the window's Light/Dark,
+ * because this palette has both halves.
+ */
+export const DEFAULT_STYLE_NAME = 'Warm';
+
+/** One bucket of the default palette, in a preset's bare `RRGGBB` spelling (for the swatch). */
+export function defaultChromePalette(bucket: ChromeBucket): ChromePalette {
+    const theme = presetChromeTheme(bucket);
+    const palette: Record<string, string> = {};
+    for (const key of OVERRIDABLE_CHROME_KEYS) palette[key] = String(theme[key]).replace(/^#/, '');
+    return palette as unknown as ChromePalette;
+}
+
 // ── the shareable document ──────────────────────────────────────────────────────────
 
 /** `ChromeStyleTheme.currentVersion`. A document above this is refused, not coerced. */
@@ -251,6 +273,23 @@ export function builtInStyleTheme(preset: BuiltInChromeTheme): ChromeStyleTheme 
         sidebarGroupFillOpacity: -1,
         sidebarGroupStrokeOpacity: 0,
         sparklineColorHex: preset.palette.accent,
+        sparklineWidth: 28,
+        sparklineStyle: 'line'
+    };
+}
+
+/** Every styling field back at Kelpi's default: no overrides, the stock knobs, an accent sparkline. */
+export function defaultStyleTheme(): ChromeStyleTheme {
+    return {
+        version: CHROME_THEME_VERSION,
+        name: DEFAULT_STYLE_NAME,
+        colorOverrides: {},
+        sidebarColorIntensity: 1,
+        sidebarAvatarFillOpacity: 0.2,
+        sidebarAvatarStrokeOpacity: 0.45,
+        sidebarGroupFillOpacity: -1,
+        sidebarGroupStrokeOpacity: 0,
+        sparklineColorHex: '',
         sparklineWidth: 28,
         sparklineStyle: 'line'
     };

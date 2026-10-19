@@ -20,11 +20,13 @@ import {
     chromeThemeFileJson,
     chromeThemeShareCode,
     decodeChromeStyleTheme,
+    defaultChromePalette,
+    defaultStyleTheme,
     paletteOverrides,
     parseChromeThemeCode,
     unsupportedVersionMessage
 } from './presets';
-import { OVERRIDABLE_CHROME_KEYS, PRESET_TEXT_CHROME_KEYS, normalizeHexColor } from './theme';
+import { DARK_CHROME_THEME, OVERRIDABLE_CHROME_KEYS, PRESET_TEXT_CHROME_KEYS, normalizeHexColor } from './theme';
 
 describe('BUILT_IN_CHROME_THEMES', () => {
     it('is the Swift seven plus One Dark, dark-first then light', () => {
@@ -60,6 +62,13 @@ describe('BUILT_IN_CHROME_THEMES', () => {
                 expect(normalizeHexColor(value), `${entry.name}.${key}`).not.toBeNull();
             }
         }
+    });
+
+    it('puts everything back for Warm, whose swatch is the default palette itself', () => {
+        expect(defaultStyleTheme().colorOverrides).toEqual({});
+        expect(defaultStyleTheme().sparklineColorHex).toBe('');
+        expect(defaultChromePalette('dark').accent).toBe(DARK_CHROME_THEME.accent.replace(/^#/, ''));
+        expect(Object.keys(defaultChromePalette('light')).sort()).toEqual([...OVERRIDABLE_CHROME_KEYS].sort());
     });
 
     it('pairs One Dark, and only One Dark, with a terminal theme', () => {

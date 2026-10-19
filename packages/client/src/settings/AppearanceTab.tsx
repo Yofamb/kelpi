@@ -28,6 +28,7 @@ import {
     BUILT_IN_CHROME_THEMES,
     ChromeIcon,
     ChromeThemeError,
+    DEFAULT_STYLE_NAME,
     INVALID_THEME_MESSAGE,
     OVERRIDABLE_CHROME_KEYS,
     SYSTEM_STAT_KINDS,
@@ -36,6 +37,8 @@ import {
     chromeThemeFileJson,
     chromeThemeShareCode,
     decodeChromeStyleTheme,
+    defaultChromePalette,
+    defaultStyleTheme,
     normalizeHexColor,
     parseChromeThemeCode,
     presetChromeTheme,
@@ -414,6 +417,26 @@ export function AppearanceTab(props: AppearanceTabProps): ReactElement {
         setStatus(`Applied “${entry.name}” (${mode}) with the ${entry.terminalTheme} terminal theme.`);
     };
 
+    /**
+     * Warm, Kelpi's own palette. A preset writes its colours; this clears them, and the terminal
+     * theme one may have chosen, so the window and the terminals both fall back to the warm
+     * defaults. Light/Dark is left alone: the warm palette has both.
+     */
+    const applyDefaultStyle = (): void => {
+        applyStyleTheme(defaultStyleTheme());
+        // An explicit `background` or a theme would keep the terminals off the warm palette.
+        const terminalChosen = appearance.theme !== null || appearance.backgroundConfigured !== false;
+        if (terminalChosen) {
+            actions.setGhosttySetting('theme', null);
+            actions.setGhosttySetting('background', null);
+        }
+        setStatus(
+            terminalChosen
+                ? `Applied “${DEFAULT_STYLE_NAME}”, Kelpi’s own palette, and handed the terminal colours back to it.`
+                : `Applied “${DEFAULT_STYLE_NAME}”, Kelpi’s own palette.`
+        );
+    };
+
     const exportTheme = (): void => {
         const name = 'MyTheme';
         try {
@@ -496,10 +519,14 @@ export function AppearanceTab(props: AppearanceTabProps): ReactElement {
         <div className="flex flex-col gap-4" data-testid="settings-tab-appearance">
             <SettingsSection
                 title="Preset themes"
-                hint="One-click chrome palettes based on popular editor themes. Each recolours the sidebar, title bar, status bar and agent dots, and switches Light/Dark to suit. One Dark also switches the terminal to Atom One Dark; the others leave your terminal theme unchanged. Tweak any colour below afterwards."
+                hint="Warm is Kelpi’s own palette: it clears any preset’s colours and terminal theme, in Light or Dark. The others are based on popular editor themes; each recolours the sidebar, title bar, status bar and agent dots, and switches Light/Dark to suit. One Dark also switches the terminal to Atom One Dark. Tweak any colour below afterwards."
                 testID="appearance-presets"
             >
                 <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))' }}>
+                    <ThemePresetCell
+                        preset={{ name: DEFAULT_STYLE_NAME, appearance: bucket, palette: defaultChromePalette(bucket) }}
+                        onApply={applyDefaultStyle}
+                    />
                     {BUILT_IN_CHROME_THEMES.map((entry) => (
                         <ThemePresetCell
                             key={entry.name}

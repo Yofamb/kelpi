@@ -231,7 +231,11 @@ Effective opacity is always `min(1, value * intensity)`.
 ### Built-in chrome themes
 
 A preset gallery the user can apply in one click (writes the palette into the matching
-bucket's overrides and switches Light/Dark to suit). Eight presets: **Dracula, Nord, Gruvbox
+bucket's overrides and switches Light/Dark to suit). It opens with **Warm**, Kelpi's own
+palette, which is not a preset at all: it writes no colours but clears the overrides (and
+resets the sidebar and sparkline knobs), removes any ghostty `theme`/`background` so the
+terminals take the warm palette too, and leaves Light/Dark alone, since the palette has both
+(`DEFAULT_STYLE_NAME` / `defaultStyleTheme` in `presets.ts`). Eight presets follow: **Dracula, Nord, Gruvbox
 Dark, Tokyo Night, Catppuccin Mocha, One Dark** (dark) and **Solarized Light, Gruvbox Light**
 (light). Each specifies the 11 overridable colors (the exact hex tables are
 `BUILT_IN_CHROME_THEMES` in `packages/client/src/chrome/presets.ts`).

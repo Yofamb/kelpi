@@ -60,11 +60,12 @@ describe('Settings ▸ Appearance', () => {
         return bound;
     }
 
-    // SET-023: the Swift seven plus One Dark, each with a swatch mock — the gallery is the thing
-    // that makes a one-click palette legible before it is applied.
-    it('renders the eight preset themes as a swatch grid', () => {
+    // SET-023: Warm (Kelpi's own), the Swift seven and One Dark, each with a swatch mock — the
+    // gallery is the thing that makes a one-click palette legible before it is applied.
+    it('renders the nine preset themes as a swatch grid', () => {
         renderAppearance();
         for (const name of [
+            'warm',
             'dracula',
             'nord',
             'gruvbox-dark',
@@ -93,6 +94,26 @@ describe('Settings ▸ Appearance', () => {
         // ghostty write, so the ghostty file is never touched by applying a theme.
         expect(bound.setGhosttySetting).not.toHaveBeenCalled();
         expect(screen.getByTestId('theme-status').textContent).toContain('Applied “Solarized Light” (Light).');
+    });
+
+    // Warm is the default rather than a palette: it clears what a preset wrote, the terminal
+    // theme included, and leaves Light/Dark where it was.
+    it('applies Warm by clearing the colours and the terminal theme a preset chose', () => {
+        const bound = renderAppearance({
+            appearance: { ...DEFAULT_WS_SETTINGS.appearance, theme: 'Atom One Dark', backgroundConfigured: true }
+        });
+        fireEvent.click(screen.getByTestId('theme-preset-warm'));
+        expect(bound.general.map((entry) => entry.key)).not.toContain('chrome-appearance');
+        expect(bound.general.find((entry) => entry.key === 'chrome-colors')?.value).toBe('{}');
+        expect(bound.setGhosttySetting).toHaveBeenCalledWith('theme', null);
+        expect(bound.setGhosttySetting).toHaveBeenCalledWith('background', null);
+        expect(screen.getByTestId('theme-status').textContent).toContain('Applied “Warm”');
+    });
+
+    it('leaves the ghostty file alone when Warm has no terminal theme to clear', () => {
+        const bound = renderAppearance();
+        fireEvent.click(screen.getByTestId('theme-preset-warm'));
+        expect(bound.setGhosttySetting).not.toHaveBeenCalled();
     });
 
     // One Dark is drawn around its terminal theme, so it selects it the way the picker does.
