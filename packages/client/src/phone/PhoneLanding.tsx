@@ -49,6 +49,14 @@ export interface PhoneLandingProps {
     readonly onRemoveHost: (hostKey: string) => void;
 }
 
+/** The landing page's welcome, by the phone's own clock, as the Claude app's home screen opens. */
+export function landingGreeting(date: Date = new Date()): string {
+    const hour = date.getHours();
+    if (hour >= 5 && hour < 12) return 'Good morning';
+    if (hour >= 12 && hour < 18) return 'Good afternoon';
+    return 'Good evening';
+}
+
 export function PhoneLanding(props: PhoneLandingProps): ReactElement {
     return (
         <div
@@ -56,6 +64,14 @@ export function PhoneLanding(props: PhoneLandingProps): ReactElement {
             className="flex h-full min-h-0 flex-col overflow-y-auto"
             style={{ background: tokens.windowBackground }}
         >
+            <div data-testid="phone-landing-greeting" className="flex flex-col gap-1 px-5 pt-6 pb-2">
+                <span className="text-[28px] leading-tight" style={{ fontFamily: 'var(--kelpi-font-serif)', color: tokens.textPrimary }}>
+                    {landingGreeting()}
+                </span>
+                <span className="text-[14px]" style={{ color: tokens.textSecondary }}>
+                    Pick up where your agents left off.
+                </span>
+            </div>
             {/* No `currentHostKey`: every section is open here, so there is no default to aim. */}
             <PhoneHostTree
                 presentation="landing"

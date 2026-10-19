@@ -208,6 +208,16 @@ export function PhoneRow(props: PhoneRowProps): ReactElement {
     );
 }
 
+/**
+ * What a phone calls a pane: the name a person (or an agent) gave it, else the desktop header's
+ * title. On a phone the name is the one line there is room for, and three panes all titled
+ * `~/acme-web` are three rows nobody can tell apart.
+ */
+export function phonePaneName(pane: { readonly label: string | null }, displayTitle: string): string {
+    const label = pane.label?.trim() ?? '';
+    return label === '' ? displayTitle : label;
+}
+
 /** The pane-status dot the sidebar and the footer draw, at header size. */
 export function statusDotColor(status: string): string | null {
     if (status === 'waitingForInput') return tokens.statusWaiting;

@@ -91,7 +91,7 @@ import { PhoneWorkspaceDrawer } from './PhoneWorkspaceDrawer';
 import { TOP_PLACEMENT, type PhonePlacement } from './new-workspace';
 import type { QrCamera } from './qr-camera';
 import { useSheetHistory, type SheetHistoryLike } from './sheet-history';
-import { PHONE_ROW_MIN_PX, PHONE_SAFE_AREA, PhoneButton, statusDotColor } from './ui';
+import { PHONE_ROW_MIN_PX, PHONE_SAFE_AREA, PhoneButton, phonePaneName, statusDotColor } from './ui';
 import { usePhoneHostExpansion, type PhoneView } from './view';
 
 /** The origin's verbs the shell needs, bound by assembly to its `act`. */
@@ -576,7 +576,7 @@ export function PhoneShell(props: PhoneShellProps): ReactElement {
      */
     const keyBarReserve = keyBarPane !== null && (keyBarPane.type === 'shell' || keyBarPane.externalEditorCommand !== null);
 
-    const paneTitle = shownPane === null ? null : paneDisplayTitle(shownPane, props.homeDirectory);
+    const paneTitle = shownPane === null ? null : phonePaneName(shownPane, paneDisplayTitle(shownPane, props.homeDirectory));
     const hostLabel = remoteHost === null ? null : remoteHost.name;
     const workspaceLabel = workspace?.name ?? (props.ready ? 'No workspace' : 'Kelpi');
 

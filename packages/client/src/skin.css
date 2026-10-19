@@ -13,7 +13,7 @@
  * a stylesheet can win against an inline style.
  *
  * Desktop only where it changes geometry: the phone layout has no room for gutters, and has no
- * hover to reveal anything with.
+ * hover to reveal anything with. The phone has a section of its own at the end.
  */
 
 /* ── one ground ───────────────────────────────────────────────────────────────────────── */
@@ -369,4 +369,143 @@
   padding: 10px 14px !important;
   border-color: var(--kelpi-skin-edge) !important;
   box-shadow: var(--kelpi-skin-shadow) !important;
+}
+
+/* ── phone ────────────────────────────────────────────────────────────────────────────── */
+
+/*
+ * The phone, after the Claude app's: the header is the ground with a title on it rather than a
+ * toolbar, sheets are rounded cards with a grab handle, rows are big enough to read and to hit,
+ * and the key bar is a row of soft keys. Every control keeps its place and its `data-testid` (the
+ * phone audit taps them by it), so this is paint, not plumbing.
+ */
+[data-form-factor='phone'] [data-testid='phone-header'] {
+  background: var(--kelpi-bg) !important;
+  border-bottom-color: transparent !important;
+  min-height: 54px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+/* Header controls are quiet glyphs; the accent is kept for what a person acts on in a sheet. */
+[data-form-factor='phone'] [data-testid='phone-header'] > button:not([data-testid='phone-title']) {
+  color: var(--kelpi-fg-secondary) !important;
+  border-radius: 12px !important;
+}
+
+[data-form-factor='phone'] [data-testid='phone-header'] > button:not([data-testid='phone-title']):active {
+  background: color-mix(in srgb, var(--kelpi-fg) 8%, transparent);
+}
+
+/* The workspace is the title, in the serif; the pane under it is the subtitle. */
+[data-form-factor='phone'] [data-testid='phone-title-workspace'] {
+  font-family: var(--kelpi-font-serif);
+  font-size: 18px !important;
+  line-height: 1.25;
+  color: var(--kelpi-fg) !important;
+}
+
+[data-form-factor='phone'] [data-testid='phone-title'] [data-testid^='pane-header-'] {
+  font-size: 12.5px !important;
+  font-weight: 500 !important;
+  color: var(--kelpi-fg-secondary);
+}
+
+[data-form-factor='phone'] [data-testid='phone-pane-count'] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11.5px !important;
+  font-weight: 600;
+  color: var(--kelpi-fg);
+  background: color-mix(in srgb, var(--kelpi-fg) 10%, transparent);
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] > [data-testid$='-scrim'] {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(2px);
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side='bottom'] > [role='dialog'] {
+  border-radius: 22px 22px 0 0 !important;
+  box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side='bottom'] > [role='dialog']::before {
+  content: '';
+  flex: none;
+  align-self: center;
+  width: 36px;
+  height: 5px;
+  margin: 8px 0 2px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--kelpi-fg) 22%, transparent);
+}
+
+/* The drawer is the sidebar's ground, lifted off the page by its shadow alone. */
+[data-form-factor='phone'] [data-phone-sheet-side='left'] > [role='dialog'] {
+  background: var(--kelpi-bg) !important;
+  border-radius: 0 22px 22px 0 !important;
+  box-shadow: 12px 0 40px rgba(0, 0, 0, 0.35) !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] [role='dialog'] > [data-testid$='-header'] {
+  border-bottom-color: transparent !important;
+  padding: 4px 8px 4px 20px !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] [role='dialog'] > [data-testid$='-header'] > .font-semibold {
+  font-size: 17px !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] button[data-active] {
+  min-height: 50px !important;
+  padding-left: 20px !important;
+  font-size: 16px !important;
+}
+
+[data-form-factor='phone'] [data-phone-sheet-side] button[data-active='true'] {
+  background: color-mix(in srgb, var(--kelpi-fg) 7%, transparent) !important;
+}
+
+/* The workspace list, at a size a thumb and an arm's length can both work with. */
+[data-form-factor='phone'] [data-testid='workspace-row'],
+[data-form-factor='phone'] [data-testid='group-header'] {
+  padding-top: 9px !important;
+  padding-bottom: 9px !important;
+  border-radius: 12px !important;
+}
+
+[data-form-factor='phone'] [data-testid='workspace-row'] .text-\[13px\],
+[data-form-factor='phone'] [data-testid='group-header'] .text-\[13px\] {
+  font-size: 16px !important;
+}
+
+[data-form-factor='phone'] [data-testid='phone-landing-hosts'] > [data-host-kind] {
+  border-radius: 18px !important;
+  border-color: var(--kelpi-skin-edge) !important;
+}
+
+/*
+ * The keys keep their 44 px hit box; the key you SEE is the padding box, inset by a transparent
+ * border and clipped to it, so each one is a soft pill on the ground (lit modifiers stay accent).
+ */
+[data-form-factor='phone'] [data-testid^='terminal-key-bar-'] {
+  background-color: var(--kelpi-bg) !important;
+  border-top-color: transparent !important;
+  gap: 2px !important;
+  padding: 0 6px !important;
+}
+
+[data-form-factor='phone'] [data-testid^='terminal-key-bar-'] > button {
+  border-style: solid !important;
+  border-color: transparent !important;
+  border-width: 5px 3px !important;
+  border-radius: 15px !important;
+  background-clip: padding-box !important;
+  font-size: 15px !important;
 }

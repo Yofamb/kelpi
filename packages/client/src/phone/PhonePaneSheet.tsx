@@ -13,7 +13,7 @@ import type { ReactElement } from 'react';
 import { ChromeIcon, type ChromeIconName } from '../chrome/icons';
 import { tokens } from '../chrome/tokens';
 import { homeAbbreviated, paneDisplayTitle, type PaneModel } from '../grid';
-import { PhoneButton, PhoneRow, PhoneSheet, PhoneSheetHeader, statusDotColor } from './ui';
+import { PhoneButton, PhoneRow, PhoneSheet, PhoneSheetHeader, phonePaneName, statusDotColor } from './ui';
 
 export interface PhonePaneSheetProps {
     readonly open: boolean;
@@ -61,6 +61,14 @@ export function PhonePaneSheet(props: PhonePaneSheetProps): ReactElement | null 
                 {props.panes.map((pane) => {
                     const shown = pane.id === props.shownPaneID;
                     const dot = statusDotColor(pane.status);
+                    // The name first; then the title, or the directory when the title IS the name.
+                    const title = paneDisplayTitle(pane, props.homeDirectory);
+                    const name = phonePaneName(pane, title);
+                    const directory =
+                        pane.workingDirectory !== null && pane.workingDirectory.length > 0
+                            ? homeAbbreviated(pane.workingDirectory, props.homeDirectory)
+                            : null;
+                    const detail = name !== title ? title : directory !== title ? directory : null;
                     return (
                         <div key={pane.id} className="flex items-stretch" data-testid={`phone-pane-row-${pane.id}`} data-shown={shown ? 'true' : 'false'}>
                             <PhoneRow
@@ -75,12 +83,12 @@ export function PhonePaneSheet(props: PhonePaneSheetProps): ReactElement | null 
                                     <ChromeIcon name={paneGlyph(pane.type)} size={14} />
                                 </span>
                                 <span className="flex min-w-0 flex-1 flex-col">
-                                    <span className="truncate">{paneDisplayTitle(pane, props.homeDirectory)}</span>
-                                    {pane.workingDirectory !== null && pane.workingDirectory.length > 0 ? (
+                                    <span className="truncate">{name}</span>
+                                    {detail === null ? null : (
                                         <span className="truncate text-[12px]" style={{ color: tokens.textTertiary }}>
-                                            {homeAbbreviated(pane.workingDirectory, props.homeDirectory)}
+                                            {detail}
                                         </span>
-                                    ) : null}
+                                    )}
                                 </span>
                                 {dot === null ? null : (
                                     <span
