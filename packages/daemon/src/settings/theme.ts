@@ -13,6 +13,9 @@
  *   - **a theme registry.** Nothing here ships a palette. A name resolves to a file the user
  *     (or their ghostty install) already has, or it does not resolve at all — the port never
  *     invents colours for a name it cannot find, because a wrong Dracula is worse than none.
+ *     The one exception is `CARRIED_THEMES`: a theme a Kelpi preset selects on its own (One Dark
+ *     selects `Atom One Dark`), carried as ghostty's own file, verbatim, and consulted only
+ *     after every directory, so the preset cannot half-apply on a Mac with no Ghostty.app.
  *   - **a ghostty config implementation.** A theme file is read with the same reader
  *     `./ghostty.ts` uses for the config file (`parseConfigLines` + `parseGhosttyColor`), and
  *     the six document keys plus `palette = N=#hex` are the whole of what is understood.
@@ -221,6 +224,42 @@ export interface ResolveThemeOptions extends ThemeSearchOptions {
     readonly readFile?: ((file: string) => string | null) | undefined;
 }
 
+/**
+ * Theme files Kelpi carries itself (the module header says why there is exactly one). The text
+ * is ghostty's `Atom One Dark` as its install ships it (from iTerm2-Color-Schemes), so a copy on
+ * disk and this one agree, and a copy on disk still wins. A `Map`, so a `theme = constructor`
+ * finds nothing rather than `Object.prototype`.
+ */
+const CARRIED_THEMES: ReadonlyMap<string, string> = new Map([
+    [
+        'Atom One Dark',
+        [
+            'palette = 0=#21252b',
+            'palette = 1=#e06c75',
+            'palette = 2=#98c379',
+            'palette = 3=#e5c07b',
+            'palette = 4=#61afef',
+            'palette = 5=#c678dd',
+            'palette = 6=#56b6c2',
+            'palette = 7=#abb2bf',
+            'palette = 8=#767676',
+            'palette = 9=#e06c75',
+            'palette = 10=#98c379',
+            'palette = 11=#e5c07b',
+            'palette = 12=#61afef',
+            'palette = 13=#c678dd',
+            'palette = 14=#56b6c2',
+            'palette = 15=#abb2bf',
+            'background = #21252b',
+            'foreground = #abb2bf',
+            'cursor-color = #abb2bf',
+            'cursor-text = #21252b',
+            'selection-background = #323844',
+            'selection-foreground = #abb2bf'
+        ].join('\n')
+    ]
+]);
+
 /** Read a theme file, treating every filesystem failure as "not there". */
 function readThemeFile(file: string): string | null {
     try {
@@ -274,6 +313,10 @@ export function resolveGhosttyTheme(
         }
         return { name, path: file, palette, error: null };
     }
+
+    // No file anywhere: a theme Kelpi carries resolves from its own copy, with no path to show.
+    const carried = CARRIED_THEMES.get(name);
+    if (carried !== undefined) return { name, path: null, palette: parseGhosttyThemePalette(carried), error: null };
 
     const where = dirs.length === 0 ? 'any theme directory' : dirs.slice(0, 2).join(', ');
     return {

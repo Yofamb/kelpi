@@ -315,7 +315,7 @@ describe('parseProfiles', () => {
  * is exact, case included: these ids are case-sensitive theme FILENAMES.
  */
 describe('built-in terminal themes', () => {
-    it('ships the ten KelpiTheme built-ins, ids spelled as ghostty filenames', () => {
+    it('ships the ten KelpiTheme built-ins and Atom One Dark, ids spelled as ghostty filenames', () => {
         expect(BUILT_IN_TERMINAL_THEMES.map((theme) => theme.id)).toEqual([
             'Dracula',
             'Catppuccin Mocha',
@@ -326,7 +326,8 @@ describe('built-in terminal themes', () => {
             'Gruvbox Dark',
             'Gruvbox Light',
             'iTerm2 Solarized Dark',
-            'iTerm2 Solarized Light'
+            'iTerm2 Solarized Light',
+            'Atom One Dark'
         ]);
         // Three display names differ from the filename: the two Solarized entries (whose
         // ghostty files are prefixed `iTerm2 `) and Frappé, whose file has no accent.

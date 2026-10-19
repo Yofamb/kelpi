@@ -71,6 +71,21 @@ describe('Settings ▸ Appearance ▸ Terminal ▸ Theme (§APP-014)', () => {
         expect(screen.queryByTestId('terminal-theme-error')).toBeNull();
     });
 
+    it('labels a theme the daemon carries itself, which has no file to point at', () => {
+        renderTab({
+            theme: 'Atom One Dark',
+            backgroundColor: '#21252b',
+            terminalTheme: {
+                name: 'Atom One Dark',
+                path: null,
+                palette: { background: '#21252b', foreground: '#abb2bf', blue: '#61afef' },
+                error: null
+            }
+        });
+        expect(screen.getByTestId('terminal-theme-path').textContent).toBe('Built into Kelpi');
+        expect(screen.getAllByTestId('terminal-theme-swatch')).toHaveLength(3);
+    });
+
     it('says WHY a name did not resolve, rather than leaving the picker silent', () => {
         renderTab({
             theme: 'Made Up',

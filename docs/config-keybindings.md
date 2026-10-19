@@ -1765,11 +1765,12 @@ exact id match: a `theme` line in `~/.config/ghostty/config` wins whenever prese
 "Dracula", "Catppuccin Mocha", "Catppuccin Latte", "Catppuccin Macchiato",
 "Catppuccin Frappe" (displayed "Catppuccin Frappé"), "Nord", "Gruvbox Dark",
 "Gruvbox Light", "iTerm2 Solarized Dark" (displayed "Solarized Dark"),
-"iTerm2 Solarized Light" (displayed "Solarized Light")
+"iTerm2 Solarized Light" (displayed "Solarized Light"), "Atom One Dark"
 ```
 
-The ids are ghostty theme filenames. The kelpi value is honoured only when it names one of
-the ten ids above (exact, case-sensitive: `dracula` and a typo select nothing, leaving the
+The ids are ghostty theme filenames; the last is the port's addition, the terminal half of
+the One Dark chrome preset. The kelpi value is honoured only when it names one of
+the eleven ids above (exact, case-sensitive: `dracula` and a typo select nothing, leaving the
 terminal on whatever ghostty already resolved); ghostty's own `dark:X,light:Y` form is
 reduced to one name by the config background's light/dark verdict (`selectThemeName`,
 `packages/daemon/src/settings/theme.ts:114`). The daemon then resolves the name to a theme
@@ -1778,7 +1779,10 @@ dir beside the ghostty config it actually read, `$XDG_CONFIG_HOME/ghostty/themes
 `~/.config/ghostty/themes`, `~/Library/Application Support/com.mitchellh.ghostty/themes`,
 `$GHOSTTY_RESOURCES_DIR/themes`, the Ghostty.app bundles (per-user and `/Applications`) and
 the two Unix share paths; `KELPID_GHOSTTY_THEME_DIRS` (colon-separated) replaces the whole
-list. It parses only the keys the file defines (the six document colours plus
+list. When no directory has the file, `Atom One Dark` alone still resolves, from a verbatim
+copy of ghostty's file the daemon carries (`CARRIED_THEMES`, `path: null`, shown in Settings
+as "Built into Kelpi"), because the One Dark chrome preset selects it itself and must not
+half-apply on a Mac without Ghostty.app; an installed file always wins. It parses only the keys the file defines (the six document colours plus
 `palette = N=#hex`; `config-file` includes are not followed) and carries the result on the
 settings snapshot as `appearance.terminalTheme` (`name`, `path`, `palette`, `error`;
 `packages/protocol/src/ws/settings.ts:263-297`). It reaches every client live through
@@ -2059,7 +2063,8 @@ lives now:
    and in the `workspace-profile` / `workspace create --profile` wire handling: the CLI
    contract depends on it. The pre-port app injected `NEX_PANE_ID` and `NEX_PROFILE`; Kelpi
    injects only `KELPI_*` so the two can run side by side with no shared environment.
-10. **The `theme` config key** maps to ghostty theme filenames. It matches the same 10 ids,
+10. **The `theme` config key** maps to ghostty theme filenames. It matches the same 10 ids
+    (plus the port's `Atom One Dark`),
     the daemon resolves the theme file to a palette itself (there is no libghostty) and
     serves it live (section 11). The key stays read-only-from-file, and the user's own
     ghostty `theme` line wins over it.

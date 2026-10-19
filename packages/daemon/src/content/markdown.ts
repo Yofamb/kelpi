@@ -769,35 +769,39 @@ ${WARM_READING_STYLESHEET}`;
  * GitHub's cool greys, and the clay accent for links, quotes and ticked tasks. Appended rather
  * than edited in, so every rule above keeps its parity history and this block is the whole of
  * the difference. Charter ships with macOS; Bitstream Charter is the same face on Linux.
+ *
+ * Every colour is a `--kelpi-doc-*` property the client sets from the chrome palette
+ * (`documentPaletteStyle`), so a document follows One Dark or Dracula as the window does; the
+ * literal after each is the warm default, for a client that sets none.
  */
 const WARM_READING_STYLESHEET = `body {
     font-family: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
     line-height: 1.65;
-    color: #1f1e1d;
+    color: var(--kelpi-doc-fg, #1f1e1d);
 }
-.dark body { color: #e9e7df; }
+.dark body { color: var(--kelpi-doc-fg, #e9e7df); }
 h1, h2, h3, h4, h5, h6 {
     font-family: Charter, 'Bitstream Charter', 'Iowan Old Style', Georgia, serif;
     font-weight: 500;
 }
-h1, h2, hr { border-color: #e3e0d6; }
-.dark h1, .dark h2, .dark hr { border-color: #3a3935; }
-a { color: #b65738; }
-.dark a { color: #e0896b; }
-pre { background: #f0eee6; border-radius: 10px; }
-.dark pre { background: #1f1e1d; }
-:not(pre) > code { background: #ebe8df; }
-.dark :not(pre) > code { background: #34332f; }
-blockquote { border-left-color: #d97757; color: #6b6964; }
-.dark blockquote { border-left-color: #d97757; color: #a8a59b; }
-th, td, table.frontmatter, table.frontmatter th, table.frontmatter td { border-color: #e3e0d6; }
-th, table.frontmatter th { background: #f5f4ed; }
-.dark th, .dark td, .dark table.frontmatter, .dark table.frontmatter th, .dark table.frontmatter td { border-color: #3a3935; }
-.dark th, .dark table.frontmatter th { background: #2c2b28; }
-li.task-list-item > input.task-list-item-checkbox { border-color: #a8a59b; border-radius: 4px; }
-.dark li.task-list-item > input.task-list-item-checkbox { border-color: #85837b; }
-li.task-list-item > input.task-list-item-checkbox:checked { background-color: #c96442; border-color: #c96442; }
-.dark li.task-list-item > input.task-list-item-checkbox:checked { background-color: #d97757; border-color: #d97757; }
+h1, h2, hr { border-color: var(--kelpi-doc-rule, #e3e0d6); }
+.dark h1, .dark h2, .dark hr { border-color: var(--kelpi-doc-rule, #3a3935); }
+a { color: var(--kelpi-doc-link, #b65738); }
+.dark a { color: var(--kelpi-doc-link, #e0896b); }
+pre { background: var(--kelpi-doc-well, #f0eee6); border-radius: 10px; }
+.dark pre { background: var(--kelpi-doc-well, #1f1e1d); }
+:not(pre) > code { background: var(--kelpi-doc-chip, #ebe8df); }
+.dark :not(pre) > code { background: var(--kelpi-doc-chip, #34332f); }
+blockquote { border-left-color: var(--kelpi-doc-accent, #d97757); color: var(--kelpi-doc-muted, #6b6964); }
+.dark blockquote { border-left-color: var(--kelpi-doc-accent, #d97757); color: var(--kelpi-doc-muted, #a8a59b); }
+th, td, table.frontmatter, table.frontmatter th, table.frontmatter td { border-color: var(--kelpi-doc-rule, #e3e0d6); }
+th, table.frontmatter th { background: var(--kelpi-doc-band, #f5f4ed); }
+.dark th, .dark td, .dark table.frontmatter, .dark table.frontmatter th, .dark table.frontmatter td { border-color: var(--kelpi-doc-rule, #3a3935); }
+.dark th, .dark table.frontmatter th { background: var(--kelpi-doc-band, #2c2b28); }
+li.task-list-item > input.task-list-item-checkbox { border-color: var(--kelpi-doc-faint, #a8a59b); border-radius: 4px; }
+.dark li.task-list-item > input.task-list-item-checkbox { border-color: var(--kelpi-doc-faint, #85837b); }
+li.task-list-item > input.task-list-item-checkbox:checked { background-color: var(--kelpi-doc-accent, #c96442); border-color: var(--kelpi-doc-accent, #c96442); }
+.dark li.task-list-item > input.task-list-item-checkbox:checked { background-color: var(--kelpi-doc-accent, #d97757); border-color: var(--kelpi-doc-accent, #d97757); }
 `;
 
 export interface MarkdownRenderOptions extends ContentAppearance {

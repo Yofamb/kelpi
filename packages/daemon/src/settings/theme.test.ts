@@ -280,6 +280,28 @@ describe('resolveGhosttyTheme', () => {
         expect(resolved.error).toContain('themes');
     });
 
+    // One Dark selects this theme itself, so it must resolve on a Mac with no Ghostty.app.
+    it('resolves Atom One Dark from the copy Kelpi carries, and lets a file on disk win', () => {
+        const { home } = themeHome();
+        const options = { env: { [GHOSTTY_THEME_DIRS_ENV]: path.join(home, '.config', 'ghostty', 'themes') }, home };
+        const carried = resolveGhosttyTheme('Atom One Dark', options);
+        expect(carried.error).toBeNull();
+        expect(carried.path).toBeNull();
+        expect(carried.palette.background).toBe('#21252b');
+        expect(carried.palette.blue).toBe('#61afef');
+        // Only that name: the carried copies are a Map, not an object with a prototype.
+        expect(resolveGhosttyTheme('constructor', options).error).toContain('constructor');
+
+        const { home: other, dir } = themeHome({ 'Atom One Dark': NORD });
+        const installed = resolveGhosttyTheme('Atom One Dark', {
+            env: {},
+            home: other,
+            ghosttyPath: path.join(other, '.config', 'ghostty', 'config')
+        });
+        expect(installed.path).toBe(path.join(dir, 'Atom One Dark'));
+        expect(installed.palette.background).toBe('#2e3440');
+    });
+
     it('is the neutral answer when no theme is configured at all', () => {
         expect(resolveGhosttyTheme(null, { env: {}, home: '/nope' })).toEqual(DEFAULT_WS_TERMINAL_THEME);
         expect(resolveGhosttyTheme('   ', { env: {}, home: '/nope' })).toEqual(DEFAULT_WS_TERMINAL_THEME);

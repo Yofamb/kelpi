@@ -311,25 +311,27 @@ ${WARM_DIFF_STYLESHEET}`;
  * The warm palette over the GitHub-flavoured sheet above, as `markdown.ts` does for markdown:
  * file headers and hunk rules in the client's warm neutrals, additions and deletions in the
  * terminal palette's green and red, and a modified file in the clay accent. Appended rather than
- * edited in, so the sheet above keeps its parity history.
+ * edited in, so the sheet above keeps its parity history. The neutrals and the accent are the
+ * client's `--kelpi-doc-*` properties, as in `markdown.ts`; green and red stay put, since every
+ * palette reads them the same way.
  */
-const WARM_DIFF_STYLESHEET = `body { color: #1f1e1d; }
-.dark body { color: #e9e7df; }
-details.file > summary { color: #1f1e1d; background: #f5f4ed; border-top-color: #e3e0d6; border-bottom-color: #e3e0d6; }
-.dark details.file > summary { color: #e9e7df; background: #2c2b28; border-top-color: #3a3935; border-bottom-color: #3a3935; }
-.caret { color: #8f8d86; }
-.status-modified { background: rgba(201,100,66,0.14); color: #b65738; }
-.dark .status-modified { background: rgba(217,119,87,0.18); color: #e0896b; }
+const WARM_DIFF_STYLESHEET = `body { color: var(--kelpi-doc-fg, #1f1e1d); }
+.dark body { color: var(--kelpi-doc-fg, #e9e7df); }
+details.file > summary { color: var(--kelpi-doc-fg, #1f1e1d); background: var(--kelpi-doc-band, #f5f4ed); border-top-color: var(--kelpi-doc-rule, #e3e0d6); border-bottom-color: var(--kelpi-doc-rule, #e3e0d6); }
+.dark details.file > summary { color: var(--kelpi-doc-fg, #e9e7df); background: var(--kelpi-doc-band, #2c2b28); border-top-color: var(--kelpi-doc-rule, #3a3935); border-bottom-color: var(--kelpi-doc-rule, #3a3935); }
+.caret { color: var(--kelpi-doc-faint, #8f8d86); }
+.status-modified { background: var(--kelpi-doc-wash, rgba(201,100,66,0.14)); color: var(--kelpi-doc-link, #b65738); }
+.dark .status-modified { background: var(--kelpi-doc-wash, rgba(217,119,87,0.18)); color: var(--kelpi-doc-link, #e0896b); }
 .line-add { background: #e9f1e2; color: #4e8044; }
 .dark .line-add { background: rgba(164,197,142,0.12); color: #a4c58e; }
 .line-del { background: #f8e5df; color: #bf4a3d; }
 .dark .line-del { background: rgba(224,123,110,0.12); color: #e07b6e; }
 .stat-add { color: #4e8044; }   .dark .stat-add { color: #a4c58e; }
 .stat-del { color: #bf4a3d; }   .dark .stat-del { color: #e07b6e; }
-.line-hunk { background: #f0eee6; color: #6b6964; }
-.dark .line-hunk { background: rgba(240,238,230,0.05); color: #a8a59b; }
-.line-file-header, .empty { color: #6b6964; }
-.dark .line-file-header, .dark .empty { color: #a8a59b; }
+.line-hunk { background: var(--kelpi-doc-band, #f0eee6); color: var(--kelpi-doc-muted, #6b6964); }
+.dark .line-hunk { background: var(--kelpi-doc-band, rgba(240,238,230,0.05)); color: var(--kelpi-doc-muted, #a8a59b); }
+.line-file-header, .empty { color: var(--kelpi-doc-muted, #6b6964); }
+.dark .line-file-header, .dark .empty { color: var(--kelpi-doc-muted, #a8a59b); }
 `;
 
 export interface DiffRenderOptions extends ContentAppearance {

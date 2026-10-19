@@ -60,9 +60,9 @@ describe('Settings ▸ Appearance', () => {
         return bound;
     }
 
-    // SET-023: seven presets, each with a swatch mock — the gallery is the thing that makes a
-    // one-click palette legible before it is applied.
-    it('renders the seven preset themes as a swatch grid', () => {
+    // SET-023: the Swift seven plus One Dark, each with a swatch mock — the gallery is the thing
+    // that makes a one-click palette legible before it is applied.
+    it('renders the eight preset themes as a swatch grid', () => {
         renderAppearance();
         for (const name of [
             'dracula',
@@ -70,6 +70,7 @@ describe('Settings ▸ Appearance', () => {
             'gruvbox-dark',
             'tokyo-night',
             'catppuccin-mocha',
+            'one-dark',
             'solarized-light',
             'gruvbox-light'
         ]) {
@@ -92,6 +93,18 @@ describe('Settings ▸ Appearance', () => {
         // ghostty write, so the ghostty file is never touched by applying a theme.
         expect(bound.setGhosttySetting).not.toHaveBeenCalled();
         expect(screen.getByTestId('theme-status').textContent).toContain('Applied “Solarized Light” (Light).');
+    });
+
+    // One Dark is drawn around its terminal theme, so it selects it the way the picker does.
+    it('applies One Dark with its terminal theme, clearing the explicit background', () => {
+        const bound = renderAppearance();
+        fireEvent.click(screen.getByTestId('theme-preset-one-dark'));
+        expect(bound.general[0]).toMatchObject({ key: 'chrome-appearance', value: 'dark' });
+        expect(bound.setGhosttySetting).toHaveBeenCalledWith('theme', 'Atom One Dark');
+        expect(bound.setGhosttySetting).toHaveBeenCalledWith('background', null);
+        expect(screen.getByTestId('theme-status').textContent).toContain(
+            'Applied “One Dark” (Dark) with the Atom One Dark terminal theme.'
+        );
     });
 
     // SET-033: overrides are keyed `<bucket>:<key>` for the bucket the window is resolved at.

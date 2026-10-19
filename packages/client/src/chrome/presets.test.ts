@@ -24,36 +24,48 @@ import {
     parseChromeThemeCode,
     unsupportedVersionMessage
 } from './presets';
-import { OVERRIDABLE_CHROME_KEYS, normalizeHexColor } from './theme';
+import { OVERRIDABLE_CHROME_KEYS, PRESET_TEXT_CHROME_KEYS, normalizeHexColor } from './theme';
 
 describe('BUILT_IN_CHROME_THEMES', () => {
-    it('is the seven presets, dark-first then light', () => {
+    it('is the Swift seven plus One Dark, dark-first then light', () => {
         expect(BUILT_IN_CHROME_THEMES.map((entry) => entry.name)).toEqual([
             'Dracula',
             'Nord',
             'Gruvbox Dark',
             'Tokyo Night',
             'Catppuccin Mocha',
+            'One Dark',
             'Solarized Light',
             'Gruvbox Light'
         ]);
-        expect(BUILT_IN_CHROME_THEMES.slice(0, 5).every((entry) => entry.appearance === 'dark')).toBe(true);
-        expect(BUILT_IN_CHROME_THEMES.slice(5).every((entry) => entry.appearance === 'light')).toBe(true);
+        expect(BUILT_IN_CHROME_THEMES.slice(0, 6).every((entry) => entry.appearance === 'dark')).toBe(true);
+        expect(BUILT_IN_CHROME_THEMES.slice(6).every((entry) => entry.appearance === 'light')).toBe(true);
     });
 
     /**
-     * Every palette colour has to be a real hex, and the palette has to cover exactly the
-     * overridable keys — a preset that misses one leaves that surface on the OTHER appearance's
-     * preset colour, which is how a "theme" ends up with one stray periwinkle divider.
+     * Every palette colour has to be a real hex, and the palette has to cover every overridable
+     * key — a preset that misses one leaves that surface on the OTHER appearance's preset colour,
+     * which is how a "theme" ends up with one stray periwinkle divider. Text is the only extra
+     * a palette may carry.
      */
     it('is a complete, well-formed palette for every overridable key', () => {
+        const allowed = [...OVERRIDABLE_CHROME_KEYS, ...PRESET_TEXT_CHROME_KEYS] as readonly string[];
         for (const entry of BUILT_IN_CHROME_THEMES) {
-            const keys = Object.keys(entry.palette).sort();
-            expect(keys).toEqual([...OVERRIDABLE_CHROME_KEYS].sort());
+            const keys = Object.keys(entry.palette);
+            expect(keys.filter((key) => (OVERRIDABLE_CHROME_KEYS as readonly string[]).includes(key)).sort()).toEqual(
+                [...OVERRIDABLE_CHROME_KEYS].sort()
+            );
+            expect(keys.filter((key) => !allowed.includes(key)), entry.name).toEqual([]);
             for (const [key, value] of Object.entries(entry.palette)) {
                 expect(normalizeHexColor(value), `${entry.name}.${key}`).not.toBeNull();
             }
         }
+    });
+
+    it('pairs One Dark, and only One Dark, with a terminal theme', () => {
+        expect(BUILT_IN_CHROME_THEMES.filter((entry) => entry.terminalTheme !== undefined)).toEqual([
+            expect.objectContaining({ name: 'One Dark', terminalTheme: 'Atom One Dark' })
+        ]);
     });
 
     it('maps a palette into `<bucket>:<key>` overrides', () => {

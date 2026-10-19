@@ -35,11 +35,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactElement } from 'react';
 
+import { useChromeTheme } from '../chrome/ThemeProvider';
 import { PANE_HEADER_HEIGHT } from '../grid/PaneHeader';
 import { PaneSearchOverlay } from '../grid/PaneSearchOverlay';
 import {
     CONTENT_HOST_SOURCE,
     chordKey,
+    documentPaletteFrom,
     localImagePath,
     openExternalLink,
     parseBridgeMessage,
@@ -48,6 +50,7 @@ import {
     writeClipboardText,
     type ClipboardWriter,
     type ContentChordEvent,
+    type DocumentPalette,
     type FindOp,
     type FindPalette,
     type LinkOpener
@@ -212,6 +215,20 @@ export function ContentFrame(props: ContentFrameProps): ReactElement {
     const documentBackground = props.documentBackground ?? FRAME_DOCUMENT_BACKGROUND[colorScheme];
 
     /**
+     * The chrome palette for the document to read in, when the window and the document agree
+     * on dark or light: a light window's ink on a dark terminal background is dark on dark, so a
+     * document that disagrees keeps its stylesheet's own colours. Keyed by VALUE, because a
+     * new palette means a new document and the frame reloads on it.
+     */
+    const chrome = useChromeTheme();
+    const paletteKey =
+        chrome.bucket === colorScheme ? JSON.stringify(documentPaletteFrom(chrome.theme, documentBackground)) : '';
+    const palette = useMemo(
+        () => (paletteKey === '' ? undefined : (JSON.parse(paletteKey) as DocumentPalette)),
+        [paletteKey]
+    );
+
+    /**
      * N14: the claimed set is baked INTO the document as well as posted to it, so the relay is
      * armed the instant the script runs rather than when the first `ready` is answered. A
      * rebind still arrives as a `chords` message; it also rebuilds this document, which is
@@ -227,9 +244,10 @@ export function ContentFrame(props: ContentFrameProps): ReactElement {
                 background: documentBackground,
                 colorScheme,
                 findPalette: props.findPalette,
+                palette,
                 claimedChords: seedChords
             }),
-        [html, paneID, props.assetBase, documentBackground, colorScheme, props.findPalette, seedChords]
+        [html, paneID, props.assetBase, documentBackground, colorScheme, props.findPalette, palette, seedChords]
     );
 
     // ── find-in-page (§3.13), per client ────────────────────────────────────────────

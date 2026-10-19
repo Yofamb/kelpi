@@ -231,10 +231,17 @@ Effective opacity is always `min(1, value * intensity)`.
 ### Built-in chrome themes
 
 A preset gallery the user can apply in one click (writes the palette into the matching
-bucket's overrides and switches Light/Dark to suit; the terminal theme is untouched).
-Seven presets: **Dracula, Nord, Gruvbox Dark, Tokyo Night, Catppuccin Mocha** (dark) and
-**Solarized Light, Gruvbox Light** (light). Each specifies the 11 overridable colors
-(the exact hex tables are `BUILT_IN_CHROME_THEMES` in `packages/client/src/chrome/presets.ts`).
+bucket's overrides and switches Light/Dark to suit). Eight presets: **Dracula, Nord, Gruvbox
+Dark, Tokyo Night, Catppuccin Mocha, One Dark** (dark) and **Solarized Light, Gruvbox Light**
+(light). Each specifies the 11 overridable colors (the exact hex tables are
+`BUILT_IN_CHROME_THEMES` in `packages/client/src/chrome/presets.ts`).
+
+The seven from the Swift app leave the terminal theme untouched. **One Dark** is the port's
+own: it is drawn around ghostty's `Atom One Dark` theme (terminal `#21252B`, so the ground is
+`#1B1D23` and the pane cards read), selects that theme the way the terminal picker does
+(`theme = Atom One Dark`, explicit `background` removed), and carries One Dark's text colours
+(`PRESET_TEXT_CHROME_KEYS`) because the default's warm text reads wrong on its slate ground.
+Settings offers no field for those three.
 
 ### Theme sharing
 

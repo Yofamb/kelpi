@@ -5,9 +5,12 @@
 
 import { describe, expect, it, vi } from 'vitest';
 
+import { resolveChromeTheme } from '../chrome/theme';
 import {
     CONTENT_BRIDGE_SOURCE,
     contentBridgeScript,
+    documentPaletteFrom,
+    documentPaletteStyle,
     frameBaseStyle,
     localImagePath,
     openExternalLink,
@@ -103,6 +106,19 @@ describe('prepareContentDocument', () => {
         const prepared = prepareContentDocument('<h1>bare</h1>', { paneID: PANE, background: '#101013' });
         expect(prepared.indexOf('data-kelpi-frame-base')).toBeLessThan(prepared.indexOf('<h1>bare</h1>'));
         expect(frameBaseStyle('#101013', 'dark')).toContain('background-color:#101013');
+    });
+
+    // The daemon's stylesheets read `--kelpi-doc-*`, so a document wears the chrome palette.
+    it('hands the document the chrome palette, dropping anything that is not plain hex', () => {
+        const html = '<html><head></head><body></body></html>';
+        const palette = documentPaletteFrom(resolveChromeTheme({ appearance: 'dark' }), '#21252B');
+        const prepared = prepareContentDocument(html, { paneID: PANE, palette });
+        expect(prepared).toContain(`--kelpi-doc-accent:${palette.accent};`);
+        expect(prepared).toContain(`--kelpi-doc-well:${palette.well};`);
+
+        const hostile = documentPaletteStyle({ accent: 'red;} body{display:none', link: '#61AFEF' });
+        expect(hostile).toBe('<style data-kelpi-doc-palette="1">html{--kelpi-doc-link:#61AFEF;}</style>');
+        expect(documentPaletteStyle({})).toBe('');
     });
 
     it('carries the pane id into the script so a message names its sender', () => {

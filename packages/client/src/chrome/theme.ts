@@ -128,6 +128,13 @@ export const OVERRIDABLE_CHROME_KEYS = [
 
 export type OverridableChromeKey = (typeof OVERRIDABLE_CHROME_KEYS)[number];
 
+/**
+ * Text colours a built-in preset may carry (`ChromePalette`), applied like any override when
+ * present. They stay out of `OVERRIDABLE_CHROME_KEYS`, so Settings offers no field for them:
+ * they exist so a preset can keep its text legible, not as another knob.
+ */
+export const PRESET_TEXT_CHROME_KEYS = ['textPrimary', 'textSecondary', 'textTertiary'] as const;
+
 /** `"<light|dark>:<key>" → "RRGGBB"`, exactly as the app stores them. */
 export type ChromeColorOverrides = Readonly<Record<string, string>>;
 
@@ -261,7 +268,7 @@ export function resolveChromeTheme(input: ChromeThemeInput = {}): ChromeTheme {
     if (overrides === undefined) return base;
 
     const resolved: Record<string, string | number> = { ...base };
-    for (const key of OVERRIDABLE_CHROME_KEYS) {
+    for (const key of [...OVERRIDABLE_CHROME_KEYS, ...PRESET_TEXT_CHROME_KEYS]) {
         const raw = overrides[`${bucket}:${key}`];
         if (raw === undefined) continue;
         const hex = normalizeHexColor(raw);

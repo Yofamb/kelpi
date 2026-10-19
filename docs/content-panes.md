@@ -503,6 +503,13 @@ FRONTMATTER_HTML + BODY_HTML
   therefore match the pane fill's colour but, unlike terminal panes, do not become
   see-through at 0% opacity. The daemon's HTML contract is untouched: a client that can
   composite transparency simply passes no background and gets the transparent document.
+- The daemon's warm reading and diff sheets (appended to the GitHub-derived ones) take every
+  neutral and the accent from `--kelpi-doc-*` custom properties, each with its warm default
+  as the fallback. `ContentFrame` sets them on `html` from the resolved chrome palette
+  (`documentPaletteFrom` / `documentPaletteStyle` in `bridge.ts`; plain `#rrggbb` only), so a
+  document follows a preset such as One Dark. It sets none when the window and the document
+  disagree on dark/light (a light window over a dark terminal), since the window's ink would
+  be the wrong one, and the sheets fall back to their own colours.
 - The background color still selects the light/dark text theme (luminance rule, 3.1).
 - When the ghostty config background color/opacity changes at runtime (theme change),
   the currently loaded content is **re-rendered** (HTML regenerated with the new

@@ -4,8 +4,9 @@
  * Two things live here, and they are the same data seen from two directions:
  *
  *   - `BUILT_IN_CHROME_THEMES` — the seven one-click presets from
- *     `Nex/Theme/BuiltInChromeThemes.swift`, colour-for-colour. Each names the appearance mode
- *     it was designed for; applying one switches to that mode AND overwrites the styling.
+ *     `Nex/Theme/BuiltInChromeThemes.swift`, colour-for-colour, plus One Dark, which has no Swift
+ *     counterpart. Each names the appearance mode it was designed for; applying one switches to
+ *     that mode AND overwrites the styling.
  *   - `ChromeStyleTheme` — `Nex/Theme/ChromeStyleTheme.swift`'s document: the per-appearance
  *     colour overrides (**both** buckets), the five sidebar knobs and the three sparkline
  *     fields, serialisable as a `.nextheme` file or a one-line `kelpi-theme:<base64>` code.
@@ -34,6 +35,14 @@ export interface ChromePalette {
     readonly statusRunning: string;
     readonly statusWaiting: string;
     readonly statusInactive: string;
+    /**
+     * Text, for a palette whose ground is far enough from the default that the default text
+     * would read as the wrong temperature on it (`PRESET_TEXT_CHROME_KEYS`). Settings still
+     * offers no field for these.
+     */
+    readonly textPrimary?: string;
+    readonly textSecondary?: string;
+    readonly textTertiary?: string;
 }
 
 export interface BuiltInChromeTheme {
@@ -41,6 +50,12 @@ export interface BuiltInChromeTheme {
     /** The mode this palette is designed for; applying the preset switches to it. */
     readonly appearance: 'light' | 'dark';
     readonly palette: ChromePalette;
+    /**
+     * The ghostty theme this palette was drawn around. Applying the preset selects it too, so
+     * the panes are the colour the chrome was designed to frame. The Swift seven have none and
+     * leave the terminal alone (SET-030).
+     */
+    readonly terminalTheme?: string;
 }
 
 /** `"<bucket>:<key>" → "RRGGBB"` for ONE appearance bucket. */
@@ -137,6 +152,31 @@ export const BUILT_IN_CHROME_THEMES: readonly BuiltInChromeTheme[] = [
             statusRunning: 'A6E3A1',
             statusWaiting: '89B4FA',
             statusInactive: '6C7086'
+        }
+    },
+    {
+        // Atom's One Dark, framed for ghostty's "Atom One Dark": that theme paints the terminal
+        // `#21252B`, so the ground sits a step darker for the pane cards to read, and the
+        // header matches the terminal so a pane is one card. Text is One Dark's own, not the
+        // default's warm cream.
+        name: 'One Dark',
+        appearance: 'dark',
+        terminalTheme: 'Atom One Dark',
+        palette: {
+            windowBackground: '1B1D23',
+            sidebarBackground: '1B1D23',
+            headerBackground: '21252B',
+            footerBackground: '1B1D23',
+            surfaceBackground: '282C34',
+            accent: '61AFEF',
+            paneFocus: '61AFEF',
+            divider: '3A3F4B',
+            statusRunning: '98C379',
+            statusWaiting: '61AFEF',
+            statusInactive: '5C6370',
+            textPrimary: 'D7DAE0',
+            textSecondary: 'ABB2BF',
+            textTertiary: '7F848E'
         }
     },
     {

@@ -2,8 +2,9 @@
  * The built-in TERMINAL themes (`KelpiTheme`, settings §SET-215/§SET-105/§SET-216).
  *
  * A `KelpiTheme` in the Swift app is a pair: the ghostty theme **filename** (which is what a
- * `theme = <id>` line names, and is case-sensitive) plus a display name. Ten ship, and the list
- * is closed — `KelpiTheme.named(id)` matches a built-in or nothing at all, which is the whole of
+ * `theme = <id>` line names, and is case-sensitive) plus a display name. The Swift ten ship, plus
+ * Atom One Dark (the One Dark chrome preset's terminal half), and the list is closed —
+ * `KelpiTheme.named(id)` matches a built-in or nothing at all, which is the whole of
  * §SET-216: `theme = Whatever-I-Typed` selects nothing, and the terminal keeps whatever the
  * user's own ghostty config already resolved.
  *
@@ -20,7 +21,7 @@ export interface TerminalTheme {
     readonly name: string;
 }
 
-/** `KelpiTheme.builtIn`, in the Swift order. */
+/** `KelpiTheme.builtIn`, in the Swift order, then the port's own additions. */
 export const BUILT_IN_TERMINAL_THEMES: readonly TerminalTheme[] = [
     { id: 'Dracula', name: 'Dracula' },
     { id: 'Catppuccin Mocha', name: 'Catppuccin Mocha' },
@@ -31,7 +32,8 @@ export const BUILT_IN_TERMINAL_THEMES: readonly TerminalTheme[] = [
     { id: 'Gruvbox Dark', name: 'Gruvbox Dark' },
     { id: 'Gruvbox Light', name: 'Gruvbox Light' },
     { id: 'iTerm2 Solarized Dark', name: 'Solarized Dark' },
-    { id: 'iTerm2 Solarized Light', name: 'Solarized Light' }
+    { id: 'iTerm2 Solarized Light', name: 'Solarized Light' },
+    { id: 'Atom One Dark', name: 'Atom One Dark' }
 ];
 
 /**

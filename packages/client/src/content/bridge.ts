@@ -55,6 +55,7 @@ import type { KelpiAction, KeyBindingMap, KeyTrigger } from '@kelpi/core/config'
 import { isImagePath } from '@kelpi/protocol';
 
 import { CODE_TO_KEY_CODE } from '../chrome/keys';
+import { flattenOver, normalizeHexColor, type ChromeTheme } from '../chrome/theme';
 import { sha256 } from './asset-credential';
 
 /** Marks a message as coming from a pane document (host → frame uses the other marker). */
@@ -436,6 +437,8 @@ export interface PrepareDocumentOptions {
     readonly colorScheme?: 'dark' | 'light' | undefined;
     /** SET-219's overridable find-highlight colours; absent = the Swift defaults. */
     readonly findPalette?: Partial<FindPalette> | undefined;
+    /** The colours the document reads in (`documentPaletteFrom`); absent = the stylesheet's own. */
+    readonly palette?: Partial<DocumentPalette> | undefined;
     /**
      * N14 — the claimed chord set, baked into the script the document carries.
      *
@@ -475,6 +478,73 @@ export function frameBaseStyle(background: string, colorScheme: 'dark' | 'light'
     // `html` rather than `body`: the daemon's stylesheet owns `body`, and a document whose body
     // is shorter than the viewport would leave the rest of the canvas unpainted.
     return `<style data-kelpi-frame-base="1">html{background-color:${background};color-scheme:${colorScheme};}</style>`;
+}
+
+/**
+ * The colours a document reads in, by role. The daemon's reading and diff stylesheets take each
+ * from a `--kelpi-doc-*` property and fall back to the warm defaults they were drawn in, so a
+ * document wears the chrome palette (One Dark's blue links, Dracula's purple) rather than the
+ * default's clay whatever the window is dressed in.
+ */
+export interface DocumentPalette {
+    readonly text: string;
+    readonly muted: string;
+    readonly faint: string;
+    readonly accent: string;
+    /** The accent drawn toward the text, so a link keeps its contrast in either scheme. */
+    readonly link: string;
+    readonly rule: string;
+    /** Code blocks: the window's ground, a well in the page. */
+    readonly well: string;
+    /** Inline code. */
+    readonly chip: string;
+    /** Table headers, a diff's file headers and hunk lines. */
+    readonly band: string;
+    /** The accent as a faint fill (a diff's "modified" badge). */
+    readonly wash: string;
+}
+
+const DOCUMENT_PALETTE_VARS: Readonly<Record<keyof DocumentPalette, string>> = {
+    text: '--kelpi-doc-fg',
+    muted: '--kelpi-doc-muted',
+    faint: '--kelpi-doc-faint',
+    accent: '--kelpi-doc-accent',
+    link: '--kelpi-doc-link',
+    rule: '--kelpi-doc-rule',
+    well: '--kelpi-doc-well',
+    chip: '--kelpi-doc-chip',
+    band: '--kelpi-doc-band',
+    wash: '--kelpi-doc-wash'
+};
+
+/** A chrome palette as a document's, composited over the document's own background. */
+export function documentPaletteFrom(theme: ChromeTheme, background: string): DocumentPalette {
+    const base = normalizeHexColor(background) ?? theme.headerBackground;
+    return {
+        text: theme.textPrimary,
+        muted: theme.textSecondary,
+        faint: theme.textTertiary,
+        accent: theme.accent,
+        link: flattenOver(theme.accent, 0.82, theme.textPrimary),
+        rule: theme.divider,
+        well: theme.windowBackground,
+        chip: flattenOver(theme.textPrimary, 0.08, base),
+        band: flattenOver(theme.textPrimary, 0.04, base),
+        wash: flattenOver(theme.accent, 0.16, base)
+    };
+}
+
+/**
+ * The palette as custom properties on `<html>`. Each value is pasted into a `<style>`, so one
+ * that is not a plain `#rrggbb` is dropped and that role keeps the stylesheet's default.
+ */
+export function documentPaletteStyle(palette: Partial<DocumentPalette>): string {
+    let declarations = '';
+    for (const role of Object.keys(DOCUMENT_PALETTE_VARS) as (keyof DocumentPalette)[]) {
+        const color = safeCssColor(palette[role], '');
+        if (color !== '') declarations += `${DOCUMENT_PALETTE_VARS[role]}:${color};`;
+    }
+    return declarations === '' ? '' : `<style data-kelpi-doc-palette="1">html{${declarations}}</style>`;
 }
 
 function escapeAttribute(value: string): string {
@@ -529,10 +599,15 @@ export function prepareContentDocument(html: string, options: PrepareDocumentOpt
     }
 
     const background = options.background ?? null;
+    let style = '';
     if (background !== null && background.length > 0) {
+        style += `${frameBaseStyle(background, options.colorScheme ?? 'dark')}\n`;
+    }
+    const palette = options.palette === undefined ? '' : documentPaletteStyle(options.palette);
+    if (palette !== '') style += `${palette}\n`;
+    if (style !== '') {
         // AFTER the daemon's `<style>`, so a future rule of the same specificity resolves our
         // way — the frame being opaque is a correctness requirement here, not a preference.
-        const style = `${frameBaseStyle(background, options.colorScheme ?? 'dark')}\n`;
         const headEnd = document.search(/<\/head\s*>/i);
         if (headEnd >= 0) document = document.slice(0, headEnd) + style + document.slice(headEnd);
         else document = style + document;

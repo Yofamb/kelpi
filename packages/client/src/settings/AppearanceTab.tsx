@@ -256,7 +256,7 @@ export function TerminalThemeNote(props: {
     const swatches = SWATCH_KEYS.map((key) => resolution.palette[key]).filter(
         (value): value is string => typeof value === 'string'
     );
-    if (resolution.path === null || swatches.length === 0) return null;
+    if (swatches.length === 0) return null;
     return (
         <span
             data-testid="terminal-theme-resolved"
@@ -273,8 +273,9 @@ export function TerminalThemeNote(props: {
                     />
                 ))}
             </span>
-            <span data-testid="terminal-theme-path" className="truncate font-mono">
-                {resolution.path}
+            {/* No path: the daemon's own copy (`CARRIED_THEMES`), for a theme a preset selects. */}
+            <span data-testid="terminal-theme-path" className={`truncate ${resolution.path === null ? '' : 'font-mono'}`}>
+                {resolution.path ?? 'Built into Kelpi'}
             </span>
         </span>
     );
@@ -401,7 +402,16 @@ export function AppearanceTab(props: AppearanceTabProps): ReactElement {
         // SET-024: switch to the palette's native mode FIRST, then overwrite the styling.
         actions.setGeneralSetting('chrome-appearance', entry.appearance);
         applyStyleTheme(builtInStyleTheme(entry));
-        setStatus(`Applied “${entry.name}” (${entry.appearance === 'dark' ? 'Dark' : 'Light'}).`);
+        const mode = entry.appearance === 'dark' ? 'Dark' : 'Light';
+        if (entry.terminalTheme === undefined) {
+            setStatus(`Applied “${entry.name}” (${mode}).`);
+            return;
+        }
+        // The terminal picker's own two writes (SET-040): the theme, and no `background` to
+        // outrank it.
+        actions.setGhosttySetting('theme', entry.terminalTheme);
+        actions.setGhosttySetting('background', null);
+        setStatus(`Applied “${entry.name}” (${mode}) with the ${entry.terminalTheme} terminal theme.`);
     };
 
     const exportTheme = (): void => {
@@ -486,7 +496,7 @@ export function AppearanceTab(props: AppearanceTabProps): ReactElement {
         <div className="flex flex-col gap-4" data-testid="settings-tab-appearance">
             <SettingsSection
                 title="Preset themes"
-                hint="One-click chrome palettes based on popular editor themes. Each recolours the sidebar, title bar, status bar and agent dots, and switches Light/Dark to suit. Your terminal theme is unchanged; tweak any colour below afterwards."
+                hint="One-click chrome palettes based on popular editor themes. Each recolours the sidebar, title bar, status bar and agent dots, and switches Light/Dark to suit. One Dark also switches the terminal to Atom One Dark; the others leave your terminal theme unchanged. Tweak any colour below afterwards."
                 testID="appearance-presets"
             >
                 <div className="grid gap-2.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(132px, 1fr))' }}>

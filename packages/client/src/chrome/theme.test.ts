@@ -81,10 +81,16 @@ describe('resolveChromeTheme', () => {
     it('ignores malformed hex and non-overridable keys', () => {
         const theme = resolveChromeTheme({
             appearance: 'dark',
-            overrides: { 'dark:accent': 'nope', 'dark:textPrimary': '#FF0000' }
+            overrides: { 'dark:accent': 'nope', 'dark:activeAgent': '#FF0000' }
         });
         expect(theme.accent).toBe(DARK_CHROME_THEME.accent);
-        expect(theme.textPrimary).toBe(DARK_CHROME_THEME.textPrimary);
+        expect(theme.activeAgent).toBe(DARK_CHROME_THEME.activeAgent);
+    });
+
+    it('applies the text colours a preset carries, though Settings has no field for them', () => {
+        const theme = resolveChromeTheme({ appearance: 'dark', overrides: { 'dark:textPrimary': 'D7DAE0' } });
+        expect(theme.textPrimary).toBe('#D7DAE0');
+        expect(theme.textSecondary).toBe(DARK_CHROME_THEME.textSecondary);
     });
 });
 
